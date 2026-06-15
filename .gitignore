@@ -1,0 +1,17 @@
+# Артефакты разработки — не часть сайта
+screenshots/
+uploads/
+
+# OS / редакторы
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+.DS_Store
+*~
+.vscode/
+.idea/
+
+# На случай будущей сборки
+node_modules/
+dist/
+.cache/

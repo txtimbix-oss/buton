@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Бутон · Профиль</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,500&family=Golos+Text:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<link href="../buton.css" rel="stylesheet" />
+<style>
+.cab{max-width:1240px;margin:0 auto;padding:26px 24px 80px;display:grid;grid-template-columns:230px minmax(0,1fr);gap:30px;align-items:start;}
+@media(max-width:920px){.cab{grid-template-columns:1fr;}}
+.cab-nav{position:sticky;top:84px;background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);padding:10px;display:flex;flex-direction:column;gap:4px;}
+@media(max-width:920px){.cab-nav{position:static;flex-direction:row;overflow-x:auto;padding:8px;gap:4px;}}
+.cab-nav a{display:flex;align-items:center;gap:11px;padding:11px 13px;border-radius:10px;font-size:14.5px;font-weight:500;color:var(--ink-soft);text-decoration:none;white-space:nowrap;transition:.14s;}
+.cab-nav a:hover{background:var(--paper-2);color:var(--ink);}
+.cab-nav a.on{background:var(--green-wash);color:var(--green);font-weight:600;}
+.cab-nav a svg{flex:none;}
+.cab-nav a .lk{margin-left:auto;color:var(--ink-faint);}
+.cab-nav a.locked{color:var(--ink-faint);}
+.cab-nav .sep{height:1px;background:var(--line);margin:6px 6px;}
+@media(max-width:920px){.cab-nav .sep{display:none;}}
+
+.cab-main{display:flex;flex-direction:column;gap:22px;}
+/* register hero */
+.reg{background:oklch(0.31 0.025 150);border-radius:var(--r);padding:40px;color:#fff;text-align:center;position:relative;overflow:hidden;}
+.reg .ga{width:78px;height:78px;border-radius:50%;background:oklch(1 0 0 / .1);display:grid;place-items:center;margin:0 auto 18px;color:oklch(0.82 0.02 90);border:2px solid oklch(1 0 0 / .15);}
+.reg h1{font-family:'Playfair Display',serif;font-weight:500;font-size:clamp(26px,3.4vw,38px);letter-spacing:-.015em;}
+.reg h1 em{font-style:italic;color:var(--clay);}
+.reg p{color:oklch(0.8 0.015 90);font-size:16px;margin:12px auto 24px;max-width:46ch;line-height:1.5;}
+.reg .cta{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}
+.reg .cta .btn-primary{background:var(--clay);}
+.reg .cta .btn-primary:hover{background:oklch(0.55 0.12 47);}
+.reg .cta .glink{height:52px;padding:0 22px;border-radius:12px;border:1px solid oklch(1 0 0 / .3);color:#fff;background:oklch(1 0 0 / .06);font-weight:600;font-size:16px;display:inline-flex;align-items:center;text-decoration:none;transition:.15s;}
+.reg .cta .glink:hover{background:oklch(1 0 0 / .14);}
+
+/* benefits */
+.benefits{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+@media(max-width:760px){.benefits{grid-template-columns:1fr 1fr;}}
+@media(max-width:480px){.benefits{grid-template-columns:1fr;}}
+.benefit{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);padding:20px;display:flex;gap:13px;align-items:flex-start;}
+.benefit .bi{width:42px;height:42px;border-radius:11px;background:var(--green-wash);color:var(--green);display:grid;place-items:center;flex:none;}
+.benefit .bt{font-weight:600;font-size:14.5px;}
+.benefit .bd{font-size:12.5px;color:var(--ink-faint);margin-top:2px;line-height:1.4;}
+
+.sec-h2{font-family:'Playfair Display',serif;font-weight:500;font-size:24px;letter-spacing:-.01em;margin:6px 0 -4px;}
+/* locked teasers */
+.locked-card{position:relative;border-radius:var(--r);overflow:hidden;border:1px solid var(--line);background:var(--card);box-shadow:var(--shadow);}
+.locked-card .blur{filter:blur(3px);opacity:.5;pointer-events:none;padding:22px;}
+.locked-card .lock-ov{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;background:oklch(0.97 0.012 84 / .55);backdrop-filter:blur(1px);text-align:center;padding:20px;}
+.locked-card .lock-ov .lic{width:46px;height:46px;border-radius:50%;background:var(--card);border:1px solid var(--line);display:grid;place-items:center;color:var(--ink-soft);box-shadow:var(--shadow);}
+.locked-card .lock-ov .lt{font-weight:600;font-size:15px;}
+.locked-card .lock-ov a{font-size:13.5px;color:var(--clay);font-weight:600;text-decoration:none;}
+.locked-card .lock-ov a:hover{text-decoration:underline;}
+/* teaser inner mimics */
+.tz-level .lt{display:flex;justify-content:space-between;font-size:14px;margin-bottom:11px;}
+.tz-track{height:9px;border-radius:9px;background:var(--paper-2);overflow:hidden;}
+.tz-track i{display:block;height:100%;width:60%;background:var(--clay);border-radius:9px;}
+.tz-ref{background:oklch(0.31 0.025 150);color:#fff;border-radius:10px;padding:18px;}
+.tz-ref h4{font-family:'Playfair Display',serif;font-size:17px;margin-bottom:10px;}
+.tz-ref .code{font-weight:700;letter-spacing:.06em;background:oklch(1 0 0 / .12);border:1px dashed oklch(1 0 0 / .4);border-radius:8px;padding:8px 14px;display:inline-block;}
+.tz-medals{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
+.tz-medal{text-align:center;}
+.tz-medal .mc{width:50px;height:50px;border-radius:50%;background:var(--green-wash);margin:0 auto 8px;}
+.tz-medal .mt{font-size:12px;font-weight:600;}
+</style>
+</head>
+<body>
+<div class="announce"><div class="ann-left"><span class="ann-deco"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="6" r="3.1"/><circle cx="12" cy="18" r="3.1"/><circle cx="6" cy="12" r="3.1"/><circle cx="18" cy="12" r="3.1"/><circle cx="12" cy="12" r="2.8" fill="oklch(0.7 0.13 47)"/></svg></span><span class="ann-promo"><b>−10%</b> на первый букет</span><span class="ann-badge">новым клиентам</span></div><div class="ann-trust"><span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 6h11v9H3zM14 9h4l3 3v3h-7z"/><circle cx="7" cy="18" r="1.5"/><circle cx="17" cy="18" r="1.5"/></svg> Бесплатная доставка от 4 000 ₽</span><span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg> Сборка за 2 часа</span></div></div>
+<header class="site"><div class="site-in">
+  <a class="logo" href="../Витрина.html" style="text-decoration:none;color:inherit"><span class="mark"></span>Бутон</a>
+  <nav class="main"><a href="../Витрина.html">Главная</a><a href="../Каталог.html">Каталог</a><a href="../Конструктор букета.html">Конструктор</a><a href="../Доставка.html">Доставка</a><a href="../Подписка.html">Подписка</a></nav>
+  <div class="site-tools">
+    <a class="icobtn" href="../Каталог.html"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.2-3.2"/></svg></a>
+    <a class="icobtn" href="../Витрина.html"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 20s-7-4.5-9.3-9C1.2 8 2.6 4.5 6 4.5c2 0 3.2 1.2 4 2.3.8-1.1 2-2.3 4-2.3 3.4 0 4.8 3.5 3.3 6.5C19 15.5 12 20 12 20Z"/></svg></a>
+    <a class="icobtn on" href="Гость.html" style="color:var(--green)"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="8" r="3.4"/><path d="M5.5 20c.6-3.5 3.2-5.4 6.5-5.4s5.9 1.9 6.5 5.4"/></svg></a>
+    <a class="icobtn" href="../Оформление заказа.html"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M6 7h13l-1.3 8.5a2 2 0 0 1-2 1.7H9.2a2 2 0 0 1-2-1.7L5.6 4.8A1 1 0 0 0 4.6 4H3"/><circle cx="9.5" cy="20" r="1.1" fill="currentColor" stroke="none"/><circle cx="16" cy="20" r="1.1" fill="currentColor" stroke="none"/></svg></a>
+  </div>
+</div></header>
+
+<div class="cab">
+  <!-- SIDEBAR (guest) -->
+  <nav class="cab-nav">
+    <a href="#" class="on"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="8" r="3.4"/><path d="M5.5 20c.6-3.5 3.2-5.4 6.5-5.4s5.9 1.9 6.5 5.4"/></svg>Профиль</a>
+    <a href="Мои заказы.html"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 2h9l4 4v16H6zM9 12h7M9 16h7"/></svg>Мои заказы</a>
+    <a href="Вход.html#register" class="locked"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="m12 3 2.9 6.3 6.8.7-5 4.6 1.4 6.7L12 17.8 5.9 20.3l1.4-6.7-5-4.6 6.8-.7z"/></svg>Достижения <span class="lk"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg></span></a>
+    <a href="Избранное.html"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 20s-7-4.5-9.3-9C1.2 8 2.6 4.5 6 4.5c2 0 3.2 1.2 4 2.3.8-1.1 2-2.3 4-2.3 3.4 0 4.8 3.5 3.3 6.5C19 15.5 12 20 12 20Z"/></svg>Избранное</a>
+    <a href="../Подписка.html"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 12a9 9 0 0 1 15-6.7L21 8M21 12a9 9 0 0 1-15 6.7L3 16M21 4v4h-4M3 20v-4h4"/></svg>Подписки</a>
+    <div class="sep"></div>
+    <a href="Вход.html"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M10 8V6a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-6a2 2 0 0 1-2-2v-2M3 12h12m0 0-3-3m3 3-3 3"/></svg>Войти</a>
+  </nav>
+
+  <!-- MAIN (guest) -->
+  <div class="cab-main">
+    <div class="reg">
+      <div class="ga"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="12" cy="8" r="3.6"/><path d="M5 20c.6-3.6 3.3-5.6 7-5.6s6.4 2 7 5.6"/></svg></div>
+      <h1 class="serif">Войдите в <em>клуб «Бутон»</em></h1>
+      <p>Вы пока не вошли в аккаунт. Зарегистрируйтесь, чтобы копить баллы, получать персональные скидки и видеть историю заказов.</p>
+      <div class="cta">
+        <a class="btn-primary" href="Вход.html#register" style="text-decoration:none">Зарегистрироваться</a>
+        <a class="glink" href="Вход.html">Войти</a>
+      </div>
+    </div>
+
+    <div>
+      <div class="sec-h2 serif">Что вы получите</div>
+    </div>
+    <div class="benefits">
+      <div class="benefit"><span class="bi"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="m12 2 2.9 6.3 6.8.7-5 4.6 1.4 6.7L12 17.8 5.9 20.3l1.4-6.7-5-4.6 6.8-.7z"/></svg></span><div><div class="bt">Баллы и кэшбэк</div><div class="bd">Возвращаем до 15% баллами с каждого заказа</div></div></div>
+      <div class="benefit"><span class="bi"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 17l6-6 4 4 8-8M14 7h7v7"/></svg></span><div><div class="bt">Уровни и скидки</div><div class="bd">Чем больше заказов — тем выше уровень и скидка</div></div></div>
+      <div class="benefit"><span class="bi"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="9" cy="8" r="3"/><path d="M15 8a3 3 0 1 0 0-.01M2 20c.5-3 3-5 7-5s6.5 2 7 5M16 15c3 0 5 1.5 5.5 4"/></svg></span><div><div class="bt">Реферальная программа</div><div class="bd">500 бонусов за каждого приглашённого друга</div></div></div>
+      <div class="benefit"><span class="bi"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 2h9l4 4v16H6zM9 12h7M9 16h7"/></svg></span><div><div class="bt">История заказов</div><div class="bd">Повторяйте любимые букеты в один клик</div></div></div>
+      <div class="benefit"><span class="bi"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 8h3l1.5-2h7L17 8h3v11H4z"/><circle cx="12" cy="13" r="3"/></svg></span><div><div class="bt">Фото перед доставкой</div><div class="bd">Покажем готовый букет до отправки</div></div></div>
+      <div class="benefit"><span class="bi"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 12a9 9 0 0 1 15-6.7L21 8M21 12a9 9 0 0 1-15 6.7L3 16"/></svg></span><div><div class="bt">Подписка со скидкой</div><div class="bd">Свежие цветы по расписанию выгоднее</div></div></div>
+    </div>
+
+    <div>
+      <div class="sec-h2 serif">Откроется после регистрации</div>
+    </div>
+    <div class="locked-card">
+      <div class="blur">
+        <div class="tz-level"><div class="lt"><span><b>Золото</b> → Платина</span><span>62 000 / 80 000 ₽</span></div><div class="tz-track"><i></i></div></div>
+        <div style="height:18px"></div>
+        <div class="tz-medals"><div class="tz-medal"><div class="mc"></div><div class="mt">Первый заказ</div></div><div class="tz-medal"><div class="mc"></div><div class="mt">Завсегдатай</div></div><div class="tz-medal"><div class="mc"></div><div class="mt">Щедрый</div></div><div class="tz-medal"><div class="mc"></div><div class="mt">Легенда</div></div></div>
+      </div>
+      <div class="lock-ov">
+        <div class="lic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg></div>
+        <div class="lt">Уровни, баллы и достижения</div>
+        <a href="Вход.html#register">Зарегистрироваться, чтобы открыть →</a>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

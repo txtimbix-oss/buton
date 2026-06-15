@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Бутон · Мои заказы</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,500&family=Golos+Text:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<link href="../buton.css" rel="stylesheet" />
+<style>
+.cab{max-width:1240px;margin:0 auto;padding:26px 24px 80px;display:grid;grid-template-columns:230px minmax(0,1fr);gap:30px;align-items:start;}
+@media(max-width:920px){.cab{grid-template-columns:1fr;}}
+.cab-nav{position:sticky;top:84px;background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);padding:10px;display:flex;flex-direction:column;gap:4px;}
+@media(max-width:920px){.cab-nav{position:static;flex-direction:row;overflow-x:auto;padding:8px;gap:4px;}}
+.cab-nav a{display:flex;align-items:center;gap:11px;padding:11px 13px;border-radius:10px;font-size:14.5px;font-weight:500;color:var(--ink-soft);text-decoration:none;white-space:nowrap;transition:.14s;}
+.cab-nav a:hover{background:var(--paper-2);color:var(--ink);}
+.cab-nav a.on{background:var(--green-wash);color:var(--green);font-weight:600;}
+.cab-nav a svg{flex:none;}
+.cab-nav .sep{height:1px;background:var(--line);margin:6px 6px;}
+@media(max-width:920px){.cab-nav .sep{display:none;}}
+.cab-nav a.exit{color:var(--ink-faint);}
+
+.oh-head{display:flex;justify-content:space-between;align-items:baseline;gap:16px;flex-wrap:wrap;margin-bottom:18px;}
+.oh-head h1{font-family:'Playfair Display',serif;font-weight:500;font-size:32px;letter-spacing:-.015em;}
+.oh-head .cnt{font-size:14px;color:var(--ink-faint);}
+.filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:22px;}
+.filt{padding:8px 15px;border-radius:30px;border:1px solid var(--line-strong);background:var(--card);font-size:13.5px;font-weight:600;cursor:pointer;transition:.14s;display:inline-flex;align-items:center;gap:7px;}
+.filt:hover{border-color:var(--green-soft);}
+.filt.on{border-color:var(--green);background:var(--green);color:#fff;}
+.filt .dot{width:8px;height:8px;border-radius:50%;}
+
+.orders{display:flex;flex-direction:column;gap:14px;}
+.order{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);overflow:hidden;transition:.15s;}
+.order:hover{box-shadow:var(--shadow-lg);}
+.order.hidden{display:none;}
+.order-top{display:flex;align-items:center;gap:16px;padding:18px 22px;border-bottom:1px solid var(--line);flex-wrap:wrap;}
+.order-top .num{font-weight:700;font-size:16px;}
+.order-top .date{font-size:13px;color:var(--ink-faint);}
+.order-top .status{margin-left:auto;display:inline-flex;align-items:center;gap:7px;font-size:12.5px;font-weight:700;padding:6px 13px;border-radius:30px;}
+.status .sd{width:8px;height:8px;border-radius:50%;}
+/* status colors */
+.st-progress{background:var(--clay-wash);color:var(--clay);}
+.st-progress .sd{background:var(--clay);}
+.st-done{background:var(--green-wash);color:var(--green);}
+.st-done .sd{background:var(--green);}
+.st-cancel{background:oklch(0.94 0.02 25);color:oklch(0.5 0.13 25);}
+.st-cancel .sd{background:oklch(0.6 0.16 25);}
+.order-left-accent{width:4px;align-self:stretch;}
+
+.order-body{display:flex;gap:20px;padding:18px 22px;align-items:center;flex-wrap:wrap;}
+.order-items{display:flex;gap:10px;flex:1;min-width:200px;}
+.order-items .oi{display:flex;gap:10px;align-items:center;}
+.order-items .om{width:46px;height:58px;border-radius:8px;flex:none;position:relative;overflow:hidden;border:1px solid var(--line);}
+.order-items .ot .on2{font-weight:600;font-size:14px;}
+.order-items .ot .oc{font-size:12px;color:var(--ink-faint);}
+.order-meta{text-align:right;}
+.order-meta .otot{font-family:'Playfair Display',serif;font-size:22px;font-weight:600;font-variant-numeric:tabular-nums;}
+.order-meta .obal{font-size:12px;color:var(--clay);}
+.order-actions{display:flex;gap:9px;padding:0 22px 18px;flex-wrap:wrap;}
+.order-actions a,.order-actions button{height:40px;padding:0 16px;border-radius:10px;font-weight:600;font-size:13.5px;display:inline-flex;align-items:center;justify-content:center;gap:7px;text-decoration:none;cursor:pointer;transition:.14s;}
+.order-actions .primary{background:var(--green);color:#fff;}
+.order-actions .primary:hover{background:oklch(0.31 0.045 152);}
+.order-actions .ghost{border:1px solid var(--line-strong);color:var(--ink);background:var(--card);}
+.order-actions .ghost:hover{background:var(--paper-2);}
+
+.empty{display:none;text-align:center;padding:60px 20px;color:var(--ink-faint);}
+.empty.show{display:block;}
+
+/* order details modal */
+.modal-bg{position:fixed;inset:0;background:oklch(0.2 0.02 60 / .45);z-index:80;opacity:0;pointer-events:none;transition:.2s;display:flex;align-items:center;justify-content:center;padding:20px;}
+.modal-bg.open{opacity:1;pointer-events:auto;}
+.modal{background:var(--paper);border-radius:var(--r);box-shadow:var(--shadow-lg);width:560px;max-width:100%;max-height:88vh;overflow-y:auto;transform:translateY(14px);transition:.24s;}
+.modal-bg.open .modal{transform:translateY(0);}
+.modal .mh{display:flex;align-items:center;gap:13px;padding:20px 24px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--paper);z-index:1;}
+.modal .mh .mt{font-family:'Playfair Display',serif;font-size:21px;font-weight:600;}
+.modal .mh .mdate{font-size:12.5px;color:var(--ink-faint);margin-top:2px;}
+.modal .mh .mclose{margin-left:auto;width:36px;height:36px;border-radius:9px;border:1px solid var(--line);background:var(--card);display:grid;place-items:center;font-size:20px;color:var(--ink-soft);cursor:pointer;flex:none;}
+.modal .mh .mclose:hover{background:var(--paper-2);}
+.modal .mb{padding:22px 24px;}
+.modal .msec{margin-bottom:22px;}
+.modal .msec:last-child{margin-bottom:0;}
+.modal .mlbl{font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-faint);font-weight:600;margin-bottom:12px;}
+.mrow{display:flex;justify-content:space-between;gap:12px;font-size:14px;padding:8px 0;border-bottom:1px solid var(--line);}
+.mrow:last-child{border-bottom:none;}
+.mrow .k{color:var(--ink-faint);}
+.mrow .v{font-weight:500;text-align:right;}
+.medit{margin-bottom:12px;}
+.medit:last-child{margin-bottom:0;}
+.medit label{display:block;font-size:12.5px;color:var(--ink-soft);margin-bottom:5px;}
+.medit .inp{width:100%;height:42px;border:1px solid var(--line-strong);border-radius:9px;padding:0 12px;font-size:14px;background:var(--card);}
+.medit textarea.inp{height:auto;min-height:62px;padding:9px 12px;resize:vertical;line-height:1.45;}
+.medit .inp:focus{outline:none;border-color:var(--green-soft);box-shadow:0 0 0 3px var(--green-wash);}
+.editnote{display:flex;gap:9px;align-items:flex-start;font-size:12.5px;color:var(--green);background:var(--green-wash);border-radius:9px;padding:11px 13px;margin-bottom:18px;line-height:1.45;}
+.editnote svg{flex:none;margin-top:1px;}
+.mitems .oi{margin-bottom:6px;}
+.modal-foot{display:flex;gap:10px;align-items:center;padding:16px 24px;border-top:1px solid var(--line);position:sticky;bottom:0;background:var(--paper);flex-wrap:wrap;}
+.modal-foot .btn-primary{height:46px;}
+.modal-foot .ghost-btn{height:46px;}
+.cancel-link{margin-left:auto;font-size:13px;color:oklch(0.55 0.13 25);background:none;border:none;cursor:pointer;}
+.cancel-link:hover{text-decoration:underline;}
+.courier-wrap{position:relative;}
+.courier-pop{position:absolute;bottom:calc(100% + 10px);left:0;min-width:240px;background:var(--card);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow-lg);padding:14px 16px;opacity:0;transform:translateY(6px);pointer-events:none;transition:.18s;z-index:5;}
+.courier-pop.open{opacity:1;transform:translateY(0);pointer-events:auto;}
+.courier-pop::after{content:"";position:absolute;top:100%;left:26px;border:7px solid transparent;border-top-color:var(--card);}
+.courier-pop .cp-name{font-size:12.5px;color:var(--ink-faint);}
+.courier-pop .cp-phone{font-family:'Playfair Display',serif;font-size:21px;font-weight:600;margin:2px 0 11px;}
+.courier-pop .cp-acts{display:flex;gap:8px;}
+.courier-pop .cp-acts a{flex:1;height:38px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:13px;text-decoration:none;}
+.courier-pop .cp-call{background:var(--green);color:#fff;}
+.courier-pop .cp-wa{background:oklch(0.95 0.05 150);color:oklch(0.45 0.12 150);border:1px solid oklch(0.85 0.06 150);}
+.ghost-btn .caret{transition:.18s;margin-left:2px;}
+.ghost-btn.on .caret{transform:rotate(180deg);}
+</style>
+</head>
+<body>
+<div class="announce"><div class="ann-left"><span class="ann-deco"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="6" r="3.1"/><circle cx="12" cy="18" r="3.1"/><circle cx="6" cy="12" r="3.1"/><circle cx="18" cy="12" r="3.1"/><circle cx="12" cy="12" r="2.8" fill="oklch(0.7 0.13 47)"/></svg></span><span class="ann-promo"><b>Золотой уровень</b> · ваш кэшбэк 10%</span><span class="ann-badge">клуб бутон</span></div><div class="ann-trust"><span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 6h11v9H3zM14 9h4l3 3v3h-7z"/><circle cx="7" cy="18" r="1.5"/><circle cx="17" cy="18" r="1.5"/></svg> Бесплатная доставка от 4 000 ₽</span><span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg> Сборка за 2 часа</span></div></div>
+<header class="site"><div class="site-in">
+  <a class="logo" href="../Витрина.html" style="text-decoration:none;color:inherit"><span class="mark"></span>Бутон</a>
+  <nav class="main"><a href="../Витрина.html">Главная</a><a href="../Каталог.html">Каталог</a><a href="../Конструктор букета.html">Конструктор</a><a href="../Доставка.html">Доставка</a><a href="../Подписка.html">Подписка</a></nav>
+  <div class="site-tools">
+    <a class="icobtn" href="../Каталог.html"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.2-3.2"/></svg></a>
+    <a class="icobtn" href="../Витрина.html"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 20s-7-4.5-9.3-9C1.2 8 2.6 4.5 6 4.5c2 0 3.2 1.2 4 2.3.8-1.1 2-2.3 4-2.3 3.4 0 4.8 3.5 3.3 6.5C19 15.5 12 20 12 20Z"/></svg><span class="badge">2</span></a>
+    <a class="icobtn on" href="Личный кабинет.html" style="color:var(--green)"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="8" r="3.4"/><path d="M5.5 20c.6-3.5 3.2-5.4 6.5-5.4s5.9 1.9 6.5 5.4"/></svg></a>
+    <a class="icobtn" href="../Оформление заказа.html"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M6 7h13l-1.3 8.5a2 2 0 0 1-2 1.7H9.2a2 2 0 0 1-2-1.7L5.6 4.8A1 1 0 0 0 4.6 4H3"/><circle cx="9.5" cy="20" r="1.1" fill="currentColor" stroke="none"/><circle cx="16" cy="20" r="1.1" fill="currentColor" stroke="none"/></svg><span class="badge">2</span></a>
+  </div>
+</div></header>
+
+<div class="cab">
+  <!-- SIDEBAR -->
+  <nav class="cab-nav">
+    <a href="Личный кабинет.html"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="8" r="3.4"/><path d="M5.5 20c.6-3.5 3.2-5.4 6.5-5.4s5.9 1.9 6.5 5.4"/></svg>Профиль</a>
+    <a href="#" class="on"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 2h9l4 4v16H6zM9 12h7M9 16h7"/></svg>Мои заказы</a>
+    <a href="Личный кабинет.html#ach"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="m12 3 2.9 6.3 6.8.7-5 4.6 1.4 6.7L12 17.8 5.9 20.3l1.4-6.7-5-4.6 6.8-.7z"/></svg>Достижения</a>
+    <a href="Избранное.html"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 20s-7-4.5-9.3-9C1.2 8 2.6 4.5 6 4.5c2 0 3.2 1.2 4 2.3.8-1.1 2-2.3 4-2.3 3.4 0 4.8 3.5 3.3 6.5C19 15.5 12 20 12 20Z"/></svg>Избранное</a>
+    <a href="../Подписка.html"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 12a9 9 0 0 1 15-6.7L21 8M21 12a9 9 0 0 1-15 6.7L3 16M21 4v4h-4M3 20v-4h4"/></svg>Подписки</a>
+    <div class="sep"></div>
+    <a href="Гость.html" class="exit"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M14 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2v-2M9 12h12m0 0-3-3m3 3-3 3"/></svg>Выйти</a>
+  </nav>
+
+  <!-- MAIN -->
+  <div>
+    <div class="oh-head"><h1 class="serif">Мои заказы</h1><span class="cnt">всего 18 заказов</span></div>
+    <div class="filters">
+      <button class="filt on" data-f="all">Все</button>
+      <button class="filt" data-f="progress"><span class="dot" style="background:var(--clay)"></span>В процессе</button>
+      <button class="filt" data-f="done"><span class="dot" style="background:var(--green)"></span>Завершённые</button>
+      <button class="filt" data-f="cancel"><span class="dot" style="background:oklch(0.6 0.16 25)"></span>Отменённые</button>
+    </div>
+
+    <div class="orders" id="orders">
+      <!-- in progress -->
+      <div class="order" data-status="progress">
+        <div class="order-top"><span class="num">Заказ №4821</span><span class="date">сегодня, 14:20</span><span class="status st-progress"><span class="sd"></span>В пути</span></div>
+        <div class="order-body">
+          <div class="order-items">
+            <div class="oi"><div class="om ph"></div><div class="ot"><div class="on2">Белые ночи</div><div class="oc">Размер M · +Мишка</div></div></div>
+            <div class="oi"><div class="om ph"></div><div class="ot"><div class="on2">Невский букет</div><div class="oc">Размер S</div></div></div>
+          </div>
+          <div class="order-meta"><div class="otot tnum">6 750 ₽</div><div class="obal">+338 баллов после доставки</div></div>
+        </div>
+        <div class="order-actions"><button class="primary det-btn">Детали заказа</button></div>
+      </div>
+
+      <!-- done -->
+      <div class="order" data-status="done">
+        <div class="order-top"><span class="num">Заказ №4790</span><span class="date">3 дня назад</span><span class="status st-done"><span class="sd"></span>Доставлен</span></div>
+        <div class="order-body">
+          <div class="order-items"><div class="oi"><div class="om ph"></div><div class="ot"><div class="on2">Нежность в коробке</div><div class="oc">Размер M · пионовидные розы</div></div></div></div>
+          <div class="order-meta"><div class="otot tnum">5 800 ₽</div><div class="obal">+290 баллов начислено</div></div>
+        </div>
+        <div class="order-actions"><a class="primary" href="../Каталог.html">Повторить заказ</a><button class="ghost det-btn">Детали</button></div>
+      </div>
+
+      <div class="order" data-status="done">
+        <div class="order-top"><span class="num">Заказ №4655</span><span class="date">2 недели назад</span><span class="status st-done"><span class="sd"></span>Доставлен</span></div>
+        <div class="order-body">
+          <div class="order-items"><div class="oi"><div class="om ph"></div><div class="ot"><div class="on2">Летнее поле</div><div class="oc">Размер M · сезонный микс</div></div></div></div>
+          <div class="order-meta"><div class="otot tnum">3 400 ₽</div><div class="obal">+170 баллов начислено</div></div>
+        </div>
+        <div class="order-actions"><a class="primary" href="../Каталог.html">Повторить заказ</a><button class="ghost det-btn">Детали</button></div>
+      </div>
+
+      <!-- cancelled -->
+      <div class="order" data-status="cancel">
+        <div class="order-top"><span class="num">Заказ №4510</span><span class="date">месяц назад</span><span class="status st-cancel"><span class="sd"></span>Отменён</span></div>
+        <div class="order-body">
+          <div class="order-items"><div class="oi"><div class="om ph"></div><div class="ot"><div class="on2">Карамель</div><div class="oc">Размер S · отменён по запросу</div></div></div></div>
+          <div class="order-meta"><div class="otot tnum">3 900 ₽</div><div class="obal" style="color:var(--ink-faint)">возврат выполнен</div></div>
+        </div>
+        <div class="order-actions"><a class="primary" href="../Каталог.html">Заказать снова</a><button class="ghost det-btn">Детали</button></div>
+      </div>
+
+      <div class="order" data-status="done">
+        <div class="order-top"><span class="num">Заказ №4402</span><span class="date">2 месяца назад</span><span class="status st-done"><span class="sd"></span>Доставлен</span></div>
+        <div class="order-body">
+          <div class="order-items"><div class="oi"><div class="om ph"></div><div class="ot"><div class="on2">Пион-парад</div><div class="oc">Размер L · пионы розовые</div></div></div></div>
+          <div class="order-meta"><div class="otot tnum">6 800 ₽</div><div class="obal">+340 баллов начислено</div></div>
+        </div>
+        <div class="order-actions"><a class="primary" href="../Каталог.html">Повторить заказ</a><button class="ghost det-btn">Детали</button></div>
+      </div>
+    </div>
+    <div class="empty" id="ordEmpty">В этой категории заказов пока нет.</div>
+  </div>
+</div>
+
+<div class="modal-bg" id="detModal">
+  <div class="modal">
+    <div class="mh"><div><div class="mt" id="mTitle">Заказ</div><div class="mdate" id="mDate"></div></div><span id="mStatusWrap"></span><button class="mclose" id="mClose">×</button></div>
+    <div class="mb">
+      <div class="msec"><div class="mlbl">Состав заказа</div><div class="mitems order-items" id="mItems" style="flex-direction:column;align-items:stretch"></div><div class="mrow" style="margin-top:10px;border-top:1px solid var(--line);padding-top:12px"><span class="k">Итого оплачено</span><span class="v" id="mTotal"></span></div></div>
+      <div id="mDelivery"></div>
+    </div>
+    <div class="modal-foot" id="mFoot"></div>
+  </div>
+</div>
+
+<script>
+  (function(){
+    const filts=document.querySelectorAll('.filt'), orders=document.querySelectorAll('.order'), empty=document.getElementById('ordEmpty');
+    filts.forEach(f=>f.addEventListener('click',()=>{
+      filts.forEach(x=>x.classList.remove('on')); f.classList.add('on');
+      const val=f.dataset.f; let shown=0;
+      orders.forEach(o=>{ const ok=(val==='all'||o.dataset.status===val); o.classList.toggle('hidden',!ok); if(ok)shown++; });
+      empty.classList.toggle('show',shown===0);
+    }));
+
+    /* ---- order details modal ---- */
+    const ORDERS = {
+      '4821': {editable:true, recipient:'Анна', phone:'+7 (921) 000-00-00', address:'Невский пр., 28, кв. 14', slot:'Сегодня, 16:00–18:00', card:'С днём рождения! Пусть каждый день будет таким же светлым, как эти цветы.'},
+      '4790': {editable:false, recipient:'Себе', phone:'+7 (921) 000-00-00', address:'Лиговский пр., 50', slot:'Доставлен · 14:00–16:00', card:'—'},
+      '4655': {editable:false, recipient:'Мария', phone:'+7 (911) 222-33-44', address:'Садовая ул., 8', slot:'Доставлен · 12:00–14:00', card:'Спасибо за всё!'},
+      '4510': {editable:false, recipient:'Ольга', phone:'+7 (921) 555-66-77', address:'пр. Просвещения, 45', slot:'Отменён', card:'—'},
+      '4402': {editable:false, recipient:'Себе', phone:'+7 (921) 000-00-00', address:'Невский пр., 28', slot:'Доставлен · 18:00–20:00', card:'—'}
+    };
+    const modalBg=document.getElementById('detModal'), mFoot=document.getElementById('mFoot');
+    function esc(s){return s;}
+    function openDetails(order){
+      const num=order.querySelector('.num').textContent.replace(/\D/g,'');
+      const data=ORDERS[num]||{editable:false,recipient:'—',phone:'—',address:'—',slot:'—',card:'—'};
+      document.getElementById('mTitle').textContent='Заказ №'+num;
+      document.getElementById('mDate').textContent=order.querySelector('.date').textContent;
+      document.getElementById('mStatusWrap').innerHTML=order.querySelector('.status').outerHTML;
+      document.getElementById('mItems').innerHTML=order.querySelector('.order-items').innerHTML;
+      document.getElementById('mTotal').textContent=order.querySelector('.otot').textContent;
+      const del=document.getElementById('mDelivery');
+      if(data.editable){
+        del.innerHTML='<div class="editnote"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg><span>Букет ещё собирается — можно изменить адрес, время и открытку. Состав и оплату изменить нельзя.</span></div>'+
+          '<div class="msec"><div class="mlbl">Доставка</div>'+
+          field('Имя получателя',data.recipient)+field('Телефон получателя',data.phone)+field('Адрес доставки',data.address)+field('Дата и время',data.slot)+'</div>'+
+          '<div class="msec"><div class="mlbl">Открытка</div><div class="medit"><textarea class="inp" maxlength="200">'+data.card+'</textarea></div></div>';
+        mFoot.innerHTML='<button class="btn-primary" id="mSave">Сохранить изменения</button><div class="courier-wrap"><button class="ghost-btn" id="courierBtn">Связаться с курьером <svg class="caret" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg></button><div class="courier-pop" id="courierPop"><div class="cp-name">Михаил · ваш курьер</div><div class="cp-phone">+7 (911) 000-00-00</div><div class="cp-acts"><a class="cp-call" href="tel:+79110000000">Позвонить</a><a class="cp-wa" href="#">WhatsApp</a></div></div></div><button class="cancel-link">Отменить заказ</button>';
+        const save=document.getElementById('mSave');
+        save.addEventListener('click',()=>{ save.textContent='Сохранено ✓'; setTimeout(()=>closeModal(),900); });
+        const cob=document.getElementById('courierBtn'); if(cob){cob.addEventListener('click',e=>{e.stopPropagation();document.getElementById('courierPop').classList.toggle('open');cob.classList.toggle('on');});}
+      } else {
+        del.innerHTML='<div class="msec"><div class="mlbl">Доставка</div>'+
+          row('Получатель',data.recipient)+row('Телефон',data.phone)+row('Адрес',data.address)+row('Время',data.slot)+row('Открытка',data.card)+'</div>';
+        mFoot.innerHTML='<a class="btn-primary" href="../Каталог.html" style="text-decoration:none">Повторить заказ</a><button class="ghost-btn" id="mCloseBtn">Закрыть</button>';
+        const cb=document.getElementById('mCloseBtn'); if(cb) cb.addEventListener('click',closeModal);
+      }
+      modalBg.classList.add('open');
+    }
+    function field(l,v){return '<div class="medit"><label>'+l+'</label><input class="inp" value="'+v+'"></div>';}
+    function row(k,v){return '<div class="mrow"><span class="k">'+k+'</span><span class="v">'+v+'</span></div>';}
+    function closeModal(){modalBg.classList.remove('open');}
+    document.querySelectorAll('.det-btn').forEach(b=>b.addEventListener('click',()=>openDetails(b.closest('.order'))));
+    document.getElementById('mClose').addEventListener('click',closeModal);
+    modalBg.addEventListener('click',e=>{if(e.target===modalBg)closeModal();});
+    document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
+  })();
+</script>
+</body>
+</html>
