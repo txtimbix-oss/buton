@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /cart
+Disallow: /wishlist
+Disallow: /orders/
+
+Sitemap: https://spbshop.ru/sitemap.xml

@@ -1,0 +1,81 @@
+/* ────────── CSS-переменные ────────── */
+:root {
+  /* шрифты */
+  --serif: "Playfair Display", Georgia, serif;
+  --sans:  "Golos Text", -apple-system, system-ui, sans-serif;
+
+  /* палитра */
+  --paper:    #F4EEE2;
+  --paper-2:  #EBE2D1;
+  --paper-3:  #E6DCC8;
+  --card:     #FBF7EE;
+  --white:    #FBF8F1;
+  --ink:      #20302A;
+  --ink-2:    #2B3D35;
+  --green:    #2E4736;
+  --green-2:  #3B5A45;
+  --clay:     #B6543A;
+  --clay-2:   #C9785C;
+  --blush:    #F3E4DA;
+  --sand:     #D9CBB2;
+  --line:     rgba(32,48,42,0.16);
+  --line-2:   #DDD6C6;
+  --muted:    rgba(32,48,42,0.58);
+
+  /* алиасы обратной совместимости */
+  --border:   #E4DDD0;
+  --green-l:  #3D6B50;
+
+  /* статусные */
+  --success:    #1D6A35;
+  --success-bg: #E6F4EA;
+  --warn:       #B7791F;
+  --warn-bg:    #FEF3CD;
+  --error:      #B91C1C;
+  --error-bg:   #FEE2E2;
+  --info:       #1E40AF;
+  --info-bg:    #DBEAFE;
+
+  /* радиусы */
+  --r-xs:   4px;
+  --r-sm:   8px;
+  --r-md:   14px;
+  --r-lg:   20px;
+  --r-pill: 999px;
+  --radius:    var(--r-sm);
+  --radius-lg: var(--r-md);
+
+  /* тени */
+  --sh-sm:  0 1px 2px rgba(32,48,42,.06), 0 2px 6px rgba(32,48,42,.05);
+  --sh-md:  0 6px 18px rgba(32,48,42,.10), 0 2px 6px rgba(32,48,42,.06);
+  --sh-lg:  0 18px 50px rgba(20,28,22,.22);
+  --shadow:    var(--sh-sm);
+  --shadow-md: var(--sh-md);
+
+  /* motion */
+  --ease: cubic-bezier(.22,1,.36,1);
+
+  /* layout кабинета */
+  --sidebar-w: 248px;
+  --header-h:  72px;
+  --cab-h:     56px;
+  --font: var(--sans);
+}
+@media (min-width: 1024px) { :root { --cab-h: 64px; } }
+
+/* ────────── Reset ────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 16px; -webkit-text-size-adjust: 100%; }
+body {
+  font-family: var(--sans);
+  background: var(--paper);
+  color: var(--ink);
+  line-height: 1.5;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+a { color: inherit; text-decoration: none; }
+button { cursor: pointer; font-family: inherit; border: none; background: none; }
+input, select, textarea { font-family: inherit; }
+img { max-width: 100%; display: block; }
+ul { list-style: none; }

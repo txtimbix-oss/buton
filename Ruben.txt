@@ -1,0 +1,152 @@
+Что сделать, чтобы cabinet и nuxt-shop ходили в PROD API, а не в DEV
+
+Цель:
+- PROD API: https://api.spbapp.ru
+- cabinet должен слать все /api/user/* запросы на https://api.spbapp.ru/api/user/*
+- nuxt-shop должен проксировать /api/* и /uploads/* через https://api.spbapp.ru
+- WebSocket/чат должен подключаться к https://api.spbapp.ru
+
+Важно:
+- Не менять код под конкретный домен, если можно решить env-переменными.
+- Vite-переменные для cabinet вшиваются на этапе build, поэтому после изменения .env нужно пересобрать cabinet.
+- Nuxt runtimeConfig читает NUXT_* переменные на сервере, но публичные NUXT_PUBLIC_* тоже должны быть корректны при build/deploy.
+- На API должны быть разрешены CORS/cookies для доменов front.spbapp.ru и cabinet.spbapp.ru.
+
+1. cabinet
+
+cabinet читает API base здесь:
+- cabinet/src/api/index.ts
+- переменная: VITE_API_BASE
+- fallback сейчас: пустая строка, то есть запросы идут на текущий origin
+
+Для production cabinet нужно задать:
+
+VITE_API_BASE=https://api.spbapp.ru
+VITE_SHOP_URL=https://front.spbapp.ru
+
+Где задать:
+- в env production окружения, которое запускает build;
+- или в cabinet/.env.production, если деплой читает env-файлы.
+
+Пример cabinet/.env.production:
+
+VITE_API_BASE=https://api.spbapp.ru
+VITE_SHOP_URL=https://front.spbapp.ru
+
+После этого пересобрать и перезапустить cabinet:
+
+cd cabinet
+npm run build
+
+Проверка cabinet:
+- открыть cabinet.spbapp.ru
+- в DevTools -> Network проверить, что запросы идут на:
+  - https://api.spbapp.ru/api/user/auth/me
+  - https://api.spbapp.ru/api/user/orders
+  - https://api.spbapp.ru/api/user/wishlist
+- не должно быть запросов на localhost:3001 или dev IP.
+
+2. nuxt-shop
+
+nuxt-shop читает server-side API base здесь:
+- nuxt-shop/nuxt.config.ts
+- runtimeConfig.apiBase
+- переменная: NUXT_API_BASE
+- fallback сейчас: http://localhost:3001
+
+nuxt-shop proxy:
+- nuxt-shop/server/middleware/proxy.ts
+- все /api/* и /uploads/* проксируются на `${NUXT_API_BASE}${path}`
+
+Для production nuxt-shop нужно задать:
+
+NUXT_API_BASE=https://api.spbapp.ru
+NUXT_PUBLIC_SITE_URL=https://front.spbapp.ru
+NUXT_PUBLIC_CABINET_URL=https://cabinet.spbapp.ru
+NUXT_PUBLIC_API_BASE=https://api.spbapp.ru
+NUXT_PUBLIC_WS_BASE=https://api.spbapp.ru
+
+В nuxt-shop/ecosystem.config.cjs эти значения уже прописаны в env_production:
+
+NUXT_API_BASE=https://api.spbapp.ru
+NUXT_PUBLIC_SITE_URL=https://front.spbapp.ru
+NUXT_PUBLIC_CABINET_URL=https://cabinet.spbapp.ru
+NUXT_PUBLIC_API_BASE=https://api.spbapp.ru
+NUXT_PUBLIC_WS_BASE=https://api.spbapp.ru
+
+Нужно убедиться, что production реально запускается через env_production, например:
+
+cd nuxt-shop
+npm run build
+pm2 startOrReload ecosystem.config.cjs --env production
+
+Если запуск не через PM2 ecosystem, то эти переменные нужно добавить в systemd/docker/CI/CD окружение.
+
+Проверка nuxt-shop:
+- открыть front.spbapp.ru
+- проверить Network:
+  - browser-запросы на /api/products, /api/settings, /api/orders/track могут идти на front.spbapp.ru/api/... и должны проксироваться сервером Nuxt на https://api.spbapp.ru
+  - прямые публичные запросы, где используется public apiBase, должны идти на https://api.spbapp.ru/api/...
+  - socket.io/chat должен идти на https://api.spbapp.ru
+- проверить sitemap:
+  - https://front.spbapp.ru/sitemap.xml
+  - он должен брать products/collections из https://api.spbapp.ru, а не localhost:3001
+
+3. API / CORS / cookies
+
+На backend API нужно проверить production env:
+
+- CORS должен разрешать:
+  - https://front.spbapp.ru
+  - https://cabinet.spbapp.ru
+- cookies должны работать между front/cabinet и api:
+  - SameSite=None, если куки кросс-доменные
+  - Secure=true на HTTPS
+  - credentials должны приниматься API
+- WebSocket/socket.io CORS должен разрешать front.spbapp.ru и cabinet.spbapp.ru.
+- Nginx/прокси перед API должен пропускать:
+  - /api/*
+  - /uploads/*
+  - /socket.io/*
+
+4. Что проверить после деплоя
+
+cabinet:
+- login test@test.ru / test
+- профиль: /profile
+- заказы: /orders
+- избранное: /wishlist
+- чат/upload, если доступен
+
+nuxt-shop:
+- главная
+- каталог
+- карточка товара
+- корзина/промокод
+- tracking заказа
+- чат/socket
+- sitemap
+
+5. Быстрые команды диагностики
+
+Проверить, что API отвечает:
+
+curl -I https://api.spbapp.ru/api/settings
+curl -I https://api.spbapp.ru/uploads/
+
+Проверить nuxt-shop proxy:
+
+curl -I https://front.spbapp.ru/api/settings
+
+Проверить cabinet build env косвенно:
+- открыть DevTools -> Network на cabinet.spbapp.ru
+- найти запросы /api/user/*
+- Request URL должен начинаться с https://api.spbapp.ru
+
+6. Частые ошибки
+
+- Поменяли .env для cabinet, но не пересобрали Vite build.
+- Запустили nuxt-shop без `--env production`, и NUXT_API_BASE остался localhost:3001.
+- Задали NUXT_PUBLIC_API_BASE, но забыли NUXT_API_BASE: server proxy и sitemap всё равно пойдут в localhost.
+- API отвечает, но cookies не ставятся из-за SameSite/Secure/CORS.
+- WebSocket не работает, потому что настроили HTTP API, но забыли NUXT_PUBLIC_WS_BASE или /socket.io/ на nginx.

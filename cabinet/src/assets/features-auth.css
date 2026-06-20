@@ -1,0 +1,82 @@
+/* Auth screens (login/register/forgot/reset) — sliced out of layout.css,
+   features-account.css and responsive.css (route-domain split).
+   Order preserved to keep the original cascade. */
+
+.auth-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 40px;
+  width: 100%;
+  max-width: 420px;
+  box-shadow: var(--shadow-md);
+}
+
+.auth-logo {
+  font-family: var(--serif);
+  font-size: 28px;
+  font-weight: 600;
+  color: var(--ink);
+  margin-bottom: 28px;
+  text-align: center;
+  letter-spacing: -0.02em;
+}
+.auth-logo span { color: var(--clay); }
+
+.auth-title {
+  font-family: var(--serif);
+  font-size: 28px;
+  font-weight: 500;
+  margin-bottom: 6px;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+}
+
+.auth-sub {
+  font-size: 14px;
+  color: var(--ink-2);
+  margin-bottom: 28px;
+}
+
+.auth-footer {
+  margin-top: 20px;
+  text-align: center;
+  font-size: 14px;
+  color: var(--ink-2);
+}
+
+.auth-footer a { color: var(--green); font-weight: 500; }
+.auth-footer a:hover { text-decoration: underline; }
+
+/* ── Авторизация (split-layout) ── */
+.auth-wrap { min-height: 100vh; display: grid; }
+@media (min-width: 1024px) { .auth-wrap { grid-template-columns: 1fr 1fr; } }
+.auth-side { display: none; position: relative; }
+.auth-side__quote { position: absolute; inset: 0; display: flex; align-items: flex-end; padding: 48px; }
+.auth-side__quote p {
+  font-family: var(--serif); font-style: italic; font-size: 28px;
+  color: #fff; text-shadow: 0 2px 20px rgba(0,0,0,.35); max-width: 22ch;
+}
+@media (min-width: 1024px) { .auth-side { display: block; } }
+.auth-col {
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: flex-start;
+  padding: 40px 20px 60px;
+}
+.auth-logo { font-family: var(--serif); font-size: 30px; font-weight: 700; margin: 8px 0 28px; }
+.auth-logo b { color: var(--clay); }
+/* .auth-card base — определён выше, здесь добавляем пару правил */
+.auth-card h1 { font-family: var(--serif); font-size: 28px; margin-bottom: 4px; }
+.auth-card .eyebrow { display: block; margin-bottom: 8px; }
+.auth-card .lead { color: var(--muted); font-size: 14px; margin-bottom: 20px; }
+.auth-below { margin-top: 18px; font-size: 14px; color: var(--muted); text-align: center; }
+.auth-below a { color: var(--clay); font-weight: 600; }
+
+/* ── Bloom-фоны декоративной колонки ── */
+.auth-bloom-cream { background: radial-gradient(circle at 35% 30%, #FBF3DC 0%, #ECDCB4 55%, #DBC892 100%); }
+.auth-bloom-rose  { background: radial-gradient(circle at 35% 30%, #F3B9C8 0%, #DD7F9C 55%, #C25C7F 100%); }
+.auth-bloom-lav   { background: radial-gradient(circle at 35% 30%, #DAC9EC 0%, #B49BD6 55%, #9277BE 100%); }
+
+@media (max-width: 768px) {
+  .auth-card { padding: 28px 20px; }
+}

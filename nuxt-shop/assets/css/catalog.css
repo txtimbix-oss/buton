@@ -1,0 +1,13 @@
+/* ---- отзывы на странице товара ---- */
+.review { padding: 22px 0; border-bottom: 1px solid var(--line); }
+.review__head { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+.review__ava {
+  width: 42px; height: 42px; border-radius: 50%;
+  background: var(--green); color: var(--blush);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 15px; font-weight: 600; flex: 0 0 auto;
+  overflow: hidden;
+}
+.stars-pick { display: flex; gap: 6px; cursor: pointer; }
+.stars-pick svg { width: 26px; height: 26px; color: var(--line); }
+.stars-pick .lit { color: var(--clay); }

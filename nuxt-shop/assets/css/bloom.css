@@ -1,0 +1,134 @@
+/* ============================================================
+   ЦВЕТОЧНЫЕ ПЛЕЙСХОЛДЕРЫ — точно по макету
+   Многослойные hard-stop градиенты: форма цветочных головок
+   + шумовая текстура + слой объёма (multiply)
+   ============================================================ */
+.bloom {
+  position: relative;
+  overflow: hidden;
+  background: #E7DECB;
+  isolation: isolate;
+}
+
+/* слой 1 — зернистая текстура (имитация фотографии) */
+.bloom::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 160px 160px;
+  opacity: .10;
+  mix-blend-mode: overlay;
+}
+
+/* слой 2 — объём: блик + виньетка */
+.bloom::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background-image:
+    radial-gradient(60% 55% at 32% 26%, rgba(255,255,255,.30), transparent 68%),
+    radial-gradient(120% 120% at 50% 120%, rgba(20,28,18,.34), transparent 60%),
+    radial-gradient(100% 100% at 90% 8%, rgba(20,28,18,.16), transparent 55%);
+  mix-blend-mode: multiply;
+}
+
+.bloom__cap {
+  position: absolute;
+  left: 18px;
+  bottom: 16px;
+  z-index: 3;
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 15px;
+  color: rgba(255,255,255,.94);
+  text-shadow: 0 1px 10px rgba(0,0,0,.4);
+}
+
+/* Розовый */
+.bloom--rose { background:
+  radial-gradient(circle at 30% 33%, #F6DAD0 0 5%, #E9B3A7 5% 11%, #D88E80 11% 17%, transparent 18%),
+  radial-gradient(circle at 64% 26%, #F2CFC4 0 4%, #DD9D90 4% 9%, #C97D6F 9% 14%, transparent 15%),
+  radial-gradient(circle at 76% 52%, #EFC6BA 0 5%, #DA9486 5% 12%, #C2705F 12% 18%, transparent 19%),
+  radial-gradient(circle at 42% 60%, #ECC0B3 0 4%, #D38B7C 4% 10%, transparent 16%),
+  radial-gradient(circle at 22% 74%, #E7B8AB 0 4%, #CE8273 4% 9%, transparent 14%),
+  radial-gradient(40% 38% at 88% 86%, #4F5E38, transparent 70%),
+  radial-gradient(38% 40% at 8% 52%, #5A6940, transparent 72%),
+  radial-gradient(50% 44% at 50% 100%, #3F4D2C, transparent 72%),
+  linear-gradient(150deg,#E7C0B3,#C57E6F); }
+
+/* Персиковый */
+.bloom--peach { background:
+  radial-gradient(circle at 30% 33%, #FCE6CC 0 5%, #F2C79C 5% 11%, #E0A06F 11% 17%, transparent 18%),
+  radial-gradient(circle at 64% 26%, #FADFC0 0 4%, #ECB182 4% 9%, #D8945F 9% 14%, transparent 15%),
+  radial-gradient(circle at 76% 52%, #F6D5B2 0 5%, #E5A877 5% 12%, #CF8B50 12% 18%, transparent 19%),
+  radial-gradient(circle at 42% 60%, #F3CFA8 0 4%, #DC9D6A 4% 10%, transparent 16%),
+  radial-gradient(circle at 22% 74%, #EFC79E 0 4%, #D5945F 4% 9%, transparent 14%),
+  radial-gradient(40% 38% at 88% 86%, #56653C, transparent 70%),
+  radial-gradient(38% 40% at 8% 52%, #61703F, transparent 72%),
+  radial-gradient(50% 44% at 50% 100%, #45532E, transparent 72%),
+  linear-gradient(150deg,#F1D4B2,#D69A6C); }
+
+/* Ботанический зелёный */
+.bloom--green { background:
+  radial-gradient(circle at 30% 33%, #CDDAB2 0 5%, #9DB386 5% 11%, #74905F 11% 17%, transparent 18%),
+  radial-gradient(circle at 64% 26%, #C2D2A6 0 4%, #8DA673 4% 9%, #647F4E 9% 14%, transparent 15%),
+  radial-gradient(circle at 76% 52%, #B6C998 0 5%, #809B63 5% 12%, #57713F 12% 18%, transparent 19%),
+  radial-gradient(circle at 42% 60%, #A8BE8A 0 4%, #6F8A55 4% 10%, transparent 16%),
+  radial-gradient(circle at 22% 74%, #9BB37C 0 4%, #5F7A46 4% 9%, transparent 14%),
+  radial-gradient(40% 38% at 88% 86%, #34472A, transparent 70%),
+  radial-gradient(38% 40% at 8% 52%, #3C5030, transparent 72%),
+  radial-gradient(50% 44% at 50% 100%, #2B3B22, transparent 72%),
+  linear-gradient(150deg,#9EB489,#3B5440); }
+
+/* Кремовый / молочный */
+.bloom--cream { background:
+  radial-gradient(circle at 30% 33%, #FFFEF8 0 5%, #F4E9D2 5% 11%, #E2D0AE 11% 17%, transparent 18%),
+  radial-gradient(circle at 64% 26%, #FDF8EC 0 4%, #EBDABB 4% 9%, #D7C29A 9% 14%, transparent 15%),
+  radial-gradient(circle at 76% 52%, #FBF4E3 0 5%, #E8D7B8 5% 12%, #D0BB92 12% 18%, transparent 19%),
+  radial-gradient(circle at 42% 60%, #F8F0DC 0 4%, #E1CEA8 4% 10%, transparent 16%),
+  radial-gradient(circle at 22% 74%, #F3EAD2 0 4%, #DCC79C 4% 9%, transparent 14%),
+  radial-gradient(40% 38% at 88% 86%, #6A7245, transparent 70%),
+  radial-gradient(38% 40% at 8% 52%, #767E4C, transparent 72%),
+  radial-gradient(50% 44% at 50% 100%, #5A6238, transparent 72%),
+  linear-gradient(150deg,#F4EAD3,#D9C7A2); }
+
+/* Лавандовый */
+.bloom--lav { background:
+  radial-gradient(circle at 30% 33%, #EAE4F2 0 5%, #C8BCDE 5% 11%, #A795C4 11% 17%, transparent 18%),
+  radial-gradient(circle at 64% 26%, #E2DAEE 0 4%, #B9AAD4 4% 9%, #9482B4 9% 14%, transparent 15%),
+  radial-gradient(circle at 76% 52%, #DCD2EA 0 5%, #AE9DCC 5% 12%, #8470A6 12% 18%, transparent 19%),
+  radial-gradient(circle at 42% 60%, #D6CBE6 0 4%, #9C89BC 4% 10%, transparent 16%),
+  radial-gradient(circle at 22% 74%, #CFC3E0 0 4%, #8E7AAE 4% 9%, transparent 14%),
+  radial-gradient(40% 38% at 88% 86%, #4F5840, transparent 70%),
+  radial-gradient(38% 40% at 8% 52%, #58623F, transparent 72%),
+  radial-gradient(50% 44% at 50% 100%, #424A32, transparent 72%),
+  linear-gradient(150deg,#BBAED6,#6E5C8E); }
+
+/* Микс / мульти */
+.bloom--mix { background:
+  radial-gradient(circle at 30% 33%, #F8DCD0 0 5%, #E8B0A2 5% 11%, #CF7E6E 11% 17%, transparent 18%),
+  radial-gradient(circle at 64% 26%, #F6E3B2 0 4%, #E2BD6A 4% 9%, #CA9E45 9% 14%, transparent 15%),
+  radial-gradient(circle at 76% 52%, #D9CCEC 0 5%, #B0A0CE 5% 12%, #8E7BAE 12% 18%, transparent 19%),
+  radial-gradient(circle at 42% 60%, #CFE0B0 0 4%, #92A86F 4% 10%, transparent 16%),
+  radial-gradient(circle at 22% 74%, #F4D2A8 0 4%, #DCA46E 4% 9%, transparent 14%),
+  radial-gradient(40% 38% at 88% 86%, #52613A, transparent 70%),
+  radial-gradient(38% 40% at 8% 52%, #5C6B3F, transparent 72%),
+  radial-gradient(50% 44% at 50% 100%, #43512E, transparent 72%),
+  linear-gradient(150deg,#E6CDB2,#998A6A); }
+
+/* Бордовый / красный */
+.bloom--red { background:
+  radial-gradient(circle at 30% 33%, #EFA396 0 5%, #D2685A 5% 11%, #A93D33 11% 17%, transparent 18%),
+  radial-gradient(circle at 64% 26%, #E58D7E 0 4%, #C0584A 4% 9%, #97342B 9% 14%, transparent 15%),
+  radial-gradient(circle at 76% 52%, #E08474 0 5%, #B5483B 5% 12%, #84291F 12% 18%, transparent 19%),
+  radial-gradient(circle at 42% 60%, #D87567 0 4%, #A43B30 4% 10%, transparent 16%),
+  radial-gradient(circle at 22% 74%, #CC6657 0 4%, #8E2C23 4% 9%, transparent 14%),
+  radial-gradient(40% 38% at 88% 86%, #3E4A2A, transparent 70%),
+  radial-gradient(38% 40% at 8% 52%, #46532F, transparent 72%),
+  radial-gradient(50% 44% at 50% 100%, #33401F, transparent 72%),
+  linear-gradient(150deg,#BD473A,#5E1C17); }

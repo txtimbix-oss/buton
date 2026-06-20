@@ -1,0 +1,62 @@
+/* ---- страничный контейнер ---- */
+.page-wrap { min-height: 20vh; background: var(--paper); }
+
+/* ---- секционные отступы (legacy, новый код использует .sec) ---- */
+.section-pad { padding: 60px 60px 0; }
+@media (max-width: 1100px) { .section-pad { padding: 40px 32px 0; } }
+@media (max-width: 768px)  { .section-pad { padding: 28px 20px 0; } }
+
+/* ---- select: скрыть нативную стрелку ---- */
+select.input {
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2320302A' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  padding-right: 40px;
+  cursor: pointer;
+}
+
+/* ---- page transitions ---- */
+/*
+ * leave-active: position:absolute — уходящая страница «парит» над входящей,
+ * не ломает высоту layout при одновременной анимации (mode:'default').
+ */
+.page-t-enter-active {
+  transition: opacity var(--pt-dur, 220ms) var(--pt-ease, var(--ease, ease)),
+              transform var(--pt-dur, 220ms) var(--pt-ease, var(--ease, ease));
+}
+.page-t-leave-active {
+  transition: opacity var(--pt-dur, 220ms) var(--pt-ease, var(--ease, ease)),
+              transform var(--pt-dur, 220ms) var(--pt-ease, var(--ease, ease));
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  pointer-events: none;
+}
+.page-t-enter-from { opacity: 0; transform: var(--pt-enter-from, translateY(8px)); }
+.page-t-leave-to   { opacity: 0; transform: var(--pt-leave-to,   translateY(-8px)); }
+
+.page-fade-enter-active,
+.page-fade-leave-active { transition: opacity 200ms ease; }
+.page-fade-enter-from,
+.page-fade-leave-to     { opacity: 0; }
+
+.page-slide-enter-active { transition: opacity 280ms var(--ease), transform 280ms var(--ease); }
+.page-slide-enter-from   { opacity: 0; transform: translateY(12px); }
+
+@media (prefers-reduced-motion: reduce) {
+  .page-t-enter-active,
+  .page-t-leave-active,
+  .page-fade-enter-active,
+  .page-fade-leave-active,
+  .page-slide-enter-active {
+    transition: opacity 100ms ease !important;
+  }
+  .page-t-enter-from,
+  .page-t-leave-to,
+  .page-fade-enter-from,
+  .page-fade-leave-to,
+  .page-slide-enter-from {
+    transform: none !important;
+  }
+}

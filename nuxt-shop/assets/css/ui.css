@@ -1,0 +1,86 @@
+/* ---- статусные бейджи заказов ---- */
+.sbadge { display: inline-block; padding: 5px 11px; border-radius: 40px; font-size: 12px; font-weight: 600; white-space: nowrap; }
+.sbadge--yellow  { background: #F3E2BD; color: #8A6A1E; }
+.sbadge--blue    { background: #D6E3F0; color: #2A5578; }
+.sbadge--purple  { background: #E2DAEE; color: #5E4A86; }
+.sbadge--green   { background: #D2E5D6; color: #2E5536; }
+.sbadge--red     { background: #F0D8D2; color: #9E3A2A; }
+
+/* ---- карточки способа доставки ---- */
+.radio-row { display: flex; gap: 12px; }
+.radio-card {
+  flex: 1;
+  border: 1.5px solid var(--line);
+  border-radius: var(--r-md);
+  padding: 16px;
+  background: var(--white);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  cursor: pointer;
+  position: relative;
+  transition: border-color 0.15s, background 0.15s;
+}
+.radio-card:hover { border-color: var(--green-2); }
+.radio-card.is-sel { border-color: var(--green); background: color-mix(in srgb, var(--green) 5%, var(--white)); }
+.radio-card .t { font-weight: 600; font-size: 15px; }
+.radio-card .s { font-size: 13px; color: var(--muted); }
+/* .dot и .rdot — оба класса используются в шаблонах radio-card */
+.radio-card .rdot,
+.radio-card .dot {
+  position: absolute;
+  top: 16px; right: 16px;
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  border: 1.5px solid var(--line);
+  background: transparent;
+}
+.radio-card.is-sel .rdot,
+.radio-card.is-sel .dot {
+  border-color: var(--green);
+  background: var(--green);
+  box-shadow: inset 0 0 0 3px var(--white);
+}
+@media (max-width: 768px) {
+  .radio-row { flex-direction: column; gap: 10px; }
+  .radio-card { flex-direction: row; align-items: center; padding: 14px 16px; gap: 12px; }
+  .radio-card .t { flex: 1; font-size: 14px; }
+  .radio-card .s { font-size: 12.5px; }
+  .radio-card .rdot,
+  .radio-card .dot { position: static; flex: 0 0 auto; }
+}
+
+/* ---- степпер чекаута ---- */
+.checkout-steps { display: flex; gap: 14px; align-items: center; }
+.checkout-steps .st { display: flex; align-items: center; gap: 9px; font-size: 14px; color: var(--muted); }
+.checkout-steps .st b {
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  background: var(--paper-3);
+  box-shadow: inset 0 0 0 1.5px var(--line);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 700;
+}
+.checkout-steps .st.is-done { color: var(--ink); }
+.checkout-steps .st.is-done b { background: var(--green); color: #fff; box-shadow: none; }
+.checkout-steps .st.is-now  b { background: var(--clay);  color: #fff; box-shadow: none; }
+.checkout-steps .ln { width: 32px; height: 1.5px; background: var(--line); }
+
+/* ---- прогресс бесплатной доставки (legacy, новый код использует .ship-progress) ---- */
+.freebar { height: 6px; border-radius: 6px; background: var(--paper-3); overflow: hidden; }
+.freebar i { display: block; height: 100%; background: var(--clay); border-radius: 6px; }
+
+/* ---- переключатель (toggle) ---- */
+.switch {
+  width: 46px; height: 26px; border-radius: 40px;
+  background: var(--line); position: relative;
+  flex: 0 0 auto; cursor: pointer; transition: background .2s;
+  border: none;
+}
+.switch::after {
+  content: ""; position: absolute; top: 3px; left: 3px;
+  width: 20px; height: 20px; border-radius: 50%; background: #fff;
+  box-shadow: 0 1px 3px rgba(0,0,0,.2); transition: transform .2s;
+}
+.switch.on { background: var(--green); }
+.switch.on::after { transform: translateX(20px); }

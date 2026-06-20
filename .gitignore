@@ -1,17 +1,36 @@
-# Артефакты разработки — не часть сайта
-screenshots/
-uploads/
+# dependencies
+node_modules/
+**/node_modules/
 
-# OS / редакторы
-Thumbs.db
-ehthumbs.db
-Desktop.ini
+# build / generated output
+.nuxt/
+.output/
+dist/
+**/.nuxt/
+**/.output/
+**/dist/
+.vite/
+**/.vite/
+
+# logs
+logs/
+**/logs/
+*.log
+npm-debug.log*
+
+# caches / build info
+.cache/
+*.tsbuildinfo
+
+# OS / editor
 .DS_Store
-*~
+Thumbs.db
+Desktop.ini
 .vscode/
 .idea/
 
-# На случай будущей сборки
-node_modules/
-dist/
-.cache/
+# NOTE: .env files are kept in the repo on purpose — they contain only URLs
+# (no secrets). If you ever add real secrets, ignore them here:
+# **/.env
+# **/.env.production
+# !**/.env.example
