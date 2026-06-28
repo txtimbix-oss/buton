@@ -8,6 +8,11 @@
   width: 100%; max-width: var(--maxw);
   margin: 0 auto; padding-inline: var(--gut);
 }
+/* широкий контейнер: шапка + промо-баннер (шире контента) */
+.bwide {
+  width: 100%; max-width: var(--maxw-wide);
+  margin: 0 auto; padding-inline: var(--gut);
+}
 .no-scroll { overflow: hidden; }
 .lightbox-scroll-lock { overflow: hidden; }
 .hr { height: 1px; background: var(--line); border: 0; margin: 0; }

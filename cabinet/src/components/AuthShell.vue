@@ -1,7 +1,7 @@
 <template>
   <div class="auth-wrap">
     <div class="auth-col">
-      <RouterLink to="/" class="auth-logo">spb<b>shop</b></RouterLink>
+      <a :href="shopUrl" class="auth-logo">Бутон<b>.</b></a>
 
       <slot />
 
@@ -11,24 +11,31 @@
     </div>
 
     <div class="auth-side">
-      <div class="auth-bloom" :class="bloomClass"></div>
+      <img class="auth-side__img" :src="image" alt="" />
+      <div class="auth-side__scrim"></div>
       <div class="auth-side__quote">
-        <p>{{ quote }}</p>
+        <div class="auth-side__q">{{ quote }}</div>
+        <div v-if="caption" class="auth-side__cap">{{ caption }}</div>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-defineProps<{
-  quote: string
-  bloomClass: string
-}>()
-</script>
+// «Бутон.» в логотипе ведёт на главную магазина (а не внутрь кабинета)
+const shopUrl = import.meta.env.VITE_SHOP_URL || 'https://butonshop.ru'
 
-<style scoped>
-.auth-bloom {
-  position: absolute;
-  inset: 0;
-}
-</style>
+withDefaults(
+  defineProps<{
+    quote: string
+    caption?: string
+    image?: string
+    // оставлено для обратной совместимости со старыми вызовами (Login/Forgot/Reset)
+    bloomClass?: string
+  }>(),
+  {
+    caption: 'Бутон · доставка за 60 минут',
+    image: '/auth-flowers.jpg',
+  },
+)
+</script>

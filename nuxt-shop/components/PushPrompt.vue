@@ -8,8 +8,10 @@
             <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
           </svg>
         </div>
-        <p class="push-prompt__text">Хотите получать уведомления о статусе заказа и акциях?</p>
-        <p v-if="lastError" class="push-prompt__error" role="alert">{{ lastError }}</p>
+        <div class="push-prompt__body">
+          <p class="push-prompt__text">Хотите получать уведомления о статусе заказа и акциях?</p>
+          <p v-if="lastError" class="push-prompt__error" role="alert">{{ lastError }}</p>
+        </div>
         <div class="push-prompt__actions">
           <button class="push-prompt__btn push-prompt__btn--yes" :disabled="loading" @click="allow">
             {{ loading ? '…' : 'Да, хочу' }}
@@ -79,16 +81,18 @@ function dismiss() {
   display: flex; align-items: center; justify-content: center;
   color: var(--green);
 }
-.push-prompt__text {
+.push-prompt__body {
   flex: 1;
+  min-width: 0;
+}
+.push-prompt__text {
   font-size: 13.5px;
   line-height: 1.45;
   margin: 0;
   color: var(--ink);
 }
 .push-prompt__error {
-  flex-basis: 100%;
-  margin: -4px 0 0 54px;
+  margin: 5px 0 0;
   color: var(--clay, #ae4848);
   font-size: 12.5px;
   line-height: 1.35;

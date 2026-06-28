@@ -79,7 +79,7 @@ const {
   text-align: center; padding: 80px 60px;
 }
 .sale-hero__eyebrow { color: var(--blush); }
-.sale-hero__title { font-size: 60px; color: #FBF7EE; margin: 16px 0 14px; }
+.sale-hero__title { font-size: 60px; color: #FFFFFF; margin: 16px 0 14px; }
 .sale-hero__lead { font-size: 17px; opacity: .85; max-width: 520px; margin-bottom: 28px; }
 
 .sale-section { padding-bottom: 64px; }
@@ -96,7 +96,7 @@ const {
   background: rgba(255,255,255,.08); border-radius: 4px;
   padding: 14px 20px; min-width: 78px; text-align: center;
 }
-.sale-timer__n { font-family: var(--serif); font-size: 34px; color: #FBF7EE; }
+.sale-timer__n { font-family: var(--serif); font-size: 34px; color: #FFFFFF; }
 .sale-timer__l { font-size: 12px; letter-spacing: .1em; text-transform: uppercase; opacity: .7; margin-top: 4px; }
 
 .chip-btn { transition: background .15s, color .15s; }

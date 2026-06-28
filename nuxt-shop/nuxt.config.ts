@@ -33,9 +33,9 @@ export default defineNuxtConfig({
     dadataToken: process.env.NUXT_DADATA_TOKEN || process.env.DADATA_TOKEN || '',
     public: {
       // URL сайта для canonical / sitemap
-      siteUrl:    process.env.NUXT_PUBLIC_SITE_URL    || 'https://spbshop.ru',
-      // URL лично го кабинета покупателей, NUXT_PUBLIC_CABINET_URL в prod process.env.NUXT_PUBLIC_CABINET_URL ||
-      cabinetUrl:  'https://cabinet.spbapp.ru/',
+      siteUrl:    process.env.NUXT_PUBLIC_SITE_URL    || 'https://butonshop.ru',
+      // URL личного кабинета покупателей (prod: user.butonshop.ru)
+      cabinetUrl: process.env.NUXT_PUBLIC_CABINET_URL || 'https://user.butonshop.ru/',
       // WebSocket: прямой URL к API для socket.io (браузер не использует Nitro-прокси для WS)
       wsBase: process.env.NUXT_PUBLIC_WS_BASE || '',
     },
@@ -54,7 +54,7 @@ export default defineNuxtConfig({
         { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: '' },
         {
           rel: 'stylesheet',
-          href: 'https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Golos+Text:wght@400;500;600;700&display=swap',
+          href: 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:ital,wght@0,400;0,500;0,600;0,700;1,500&display=swap',
         },
       ],
     },

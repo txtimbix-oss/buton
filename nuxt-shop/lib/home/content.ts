@@ -33,9 +33,8 @@ export function buildHomeHeroStats(settings: HomeContentSettings): HomeHeroStat[
 
 export function buildHomeHeroActions(settings: HomeContentSettings): HomeHeroAction[] {
   return [
-    { label: settings.heroBtn1 || 'В каталог', to: '/catalog', tone: 'ink', showArrow: true },
-    { label: settings.heroBtn2 || 'Подписка', to: '/subscription', tone: 'ghost' },
-    { label: 'Собрать свой букет', to: '/custom', tone: 'clay' },
+    { label: settings.heroBtn1 || 'Смотреть каталог', to: '/catalog', tone: 'ink', showArrow: true },
+    { label: settings.heroBtn2 || 'Собрать свой букет', to: '/custom', tone: 'ghost' },
   ]
 }
 

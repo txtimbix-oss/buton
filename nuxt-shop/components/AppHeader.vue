@@ -1,38 +1,81 @@
 <template>
-  <!-- обёртка topbar + header удалена: topbar рендерится отдельным AppTopBar в каждой странице -->
   <header class="header" :class="{ 'is-stuck': isStuck }">
-    <div class="container header__row">
+    <!-- ===== РЯД 1 ===== -->
+    <div class="bwide hbar">
       <!-- бургер (мобиль) -->
-      <button class="iconbtn header__burger" aria-label="Меню" @click="menuOpen = true">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+      <button class="hburger" aria-label="Меню" @click="menuOpen = true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
       </button>
 
-      <!-- логотип: центр на мобиле, лево на десктопе -->
-      <NuxtLink to="/" class="header__logo">{{ settings.storeName }}<b>.</b></NuxtLink>
+      <!-- логотип -->
+      <NuxtLink to="/" class="hlogo">
+        <span class="hlogo__ic">
+          <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="6" r="3.1"/><circle cx="12" cy="18" r="3.1"/><circle cx="6" cy="12" r="3.1"/><circle cx="18" cy="12" r="3.1"/><circle cx="12" cy="12" r="2.8"/></svg>
+        </span>
+        <span class="hlogo__txt">Бутон<b>.</b></span>
+      </NuxtLink>
 
-      <!-- десктопная навигация -->
-      <nav class="header__nav">
-        <NuxtLink v-for="link in desktopNav" :key="link.to" :to="link.to">
-          {{ link.label }}
-        </NuxtLink>
-      </nav>
+      <!-- кнопка «Каталог» -->
+      <NuxtLink to="/catalog" class="hcat-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+        Каталог
+      </NuxtLink>
 
-      <!-- иконки-действия -->
-      <div class="header__actions">
-        <button class="iconbtn" title="Поиск" @click="openSearch">
-            <svg class="header__search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+      <!-- поиск -->
+      <form class="hsearch" @submit.prevent="goSearch">
+        <input v-model="searchQ" class="hsearch__inp" :placeholder="settings.searchPlaceholder || 'Найти букеты и подарки'" />
+        <button class="hsearch__btn" type="submit" aria-label="Найти">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
         </button>
-        <NuxtLink to="/wishlist" class="iconbtn" title="Избранное">
+      </form>
+
+      <!-- город / доставка -->
+      <NuxtLink to="/delivery" class="hloc">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 21s-7-5.6-7-11a7 7 0 0 1 14 0c0 5.4-7 11-7 11Z"/><circle cx="12" cy="10" r="2.6"/></svg>
+        <span class="hloc__city">Санкт-Петербург</span>
+        <span class="hloc__div"></span>
+        <span class="hloc__time">Как можно скорее</span>
+      </NuxtLink>
+
+      <!-- валюта -->
+      <button class="hcur" type="button" aria-label="Валюта">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.4 3.8 5.6 3.8 9S14.5 18.6 12 21M12 3C9.5 5.4 8.2 8.6 8.2 12S9.5 18.6 12 21"/></svg>
+        RUB
+      </button>
+
+      <!-- иконки -->
+      <div class="hicons">
+        <NuxtLink to="/wishlist" class="hicon" title="Избранное">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M12 20.3l-1.45-1.32C5.4 14.24 2 11.16 2 7.5 2 4.42 4.42 2 7.5 2c1.74 0 3.41.81 4.5 2.09C13.09 2.81 14.76 2 16.5 2 19.58 2 22 4.42 22 7.5c0 3.66-3.4 6.74-8.55 11.49L12 20.3z"/></svg>
           <span v-if="wishCount > 0" class="dot" />
         </NuxtLink>
-        <a :href="userLink" class="iconbtn header__account" :title="shopUser ? shopUser.firstName : 'Личный кабинет'">
+        <a :href="userLink" class="hicon" :title="shopUser ? shopUser.firstName : 'Личный кабинет'">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-3.5 3.6-6 8-6s8 2.5 8 6"/></svg>
         </a>
-        <!-- корзина: открывает drawer -->
-        <button class="iconbtn" :class="{ 'cart-bump': cartBump }" title="Корзина" @click="cartDrawer.open">
+        <button class="hicon" :class="{ 'cart-bump': cartBump }" title="Корзина" @click="cartDrawer.open">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M6 8h12l1 12H5L6 8zM9 8V6a3 3 0 0 1 6 0v2"/></svg>
           <span v-if="cartCount > 0" class="badge">{{ cartCount }}</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- ===== РЯД 2: категории ===== -->
+    <div class="hcats-wrap">
+      <div class="bwide hcats-inner">
+        <div ref="catsEl" class="hcats">
+          <NuxtLink
+            v-for="c in cats"
+            :key="c.label"
+            :to="c.to"
+            class="hcat"
+            :class="{ 'hcat--accent': c.accent }"
+          >
+            {{ c.label }}
+            <svg v-if="c.caret" class="hcat__car" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+          </NuxtLink>
+        </div>
+        <button class="hcats__more" aria-label="Ещё категории" @click="scrollCats">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
         </button>
       </div>
     </div>
@@ -73,7 +116,7 @@
       </Transition>
     </Teleport>
 
-    <!-- Поиск оверлей -->
+    <!-- Поиск оверлей (мобиль / запасной) -->
     <Teleport to="body">
       <Transition name="overlay-fade">
         <div v-if="showSearch" class="search-overlay" @click.self="closeSearch">
@@ -113,7 +156,7 @@
 </template>
 
 <script setup lang="ts">
-import { desktopNav, mainNav } from '~/constants/shopNav'
+import { mainNav } from '~/constants/shopNav'
 
 const router     = useRouter()
 const { cartCount } = useCart()
@@ -128,8 +171,25 @@ const userLink = computed(() =>
 )
 
 const searchInputEl = ref<HTMLInputElement | null>(null)
-
 const hints = computed(() => settings.value.search.hints)
+
+/* категории второго ряда */
+const cats = [
+  { label: 'Тренды', to: '/catalog?quick=hit' },
+  { label: 'Скидки', to: '/catalog?sale=1', accent: true },
+  { label: 'Монобукеты', to: '/catalog?coll=mono' },
+  { label: 'В коробке', to: '/catalog?coll=box' },
+  { label: 'Авторские', to: '/catalog?coll=author' },
+  { label: 'Свадебные', to: '/catalog?coll=wed' },
+  { label: 'Подписка', to: '/subscription' },
+  { label: 'Праздники', to: '/catalog', caret: true },
+  { label: 'Подарочные сертификаты', to: '/gift-cards' },
+  { label: 'Доставка', to: '/delivery' },
+]
+const catsEl = ref<HTMLElement | null>(null)
+function scrollCats() {
+  catsEl.value?.scrollBy({ left: 320, behavior: 'smooth' })
+}
 
 const {
   menuOpen,
@@ -137,7 +197,6 @@ const {
   searchQ,
   cartBump,
   isStuck,
-  openSearch,
   closeSearch,
   goSearch,
 } = useHeaderUiState({
@@ -148,10 +207,154 @@ const {
 </script>
 
 <style scoped>
-/* bump-анимация на корзине */
-.cart-bump {
-  animation: bump .4s ease;
+/* ====== РЯД 1 ====== */
+.hbar {
+  display: flex; align-items: center; gap: 14px;
+  height: 68px;
 }
+.hburger {
+  display: none; width: 42px; height: 42px; border-radius: 11px;
+  align-items: center; justify-content: center;
+  color: var(--ink); background: none; border: none; cursor: pointer; flex: none;
+}
+.hburger svg { width: 24px; height: 24px; }
+
+.hlogo {
+  display: inline-flex; align-items: center; gap: 8px; flex: none;
+  font-family: var(--serif); font-size: 26px; font-weight: 700;
+  letter-spacing: -.02em; color: var(--ink); text-decoration: none;
+}
+.hlogo b { color: var(--clay); }
+.hlogo__ic { display: inline-flex; color: var(--clay); }
+.hlogo__ic svg { width: 24px; height: 24px; }
+
+.hcat-btn {
+  display: inline-flex; align-items: center; gap: 9px; flex: none;
+  height: 48px; padding: 0 20px; border-radius: 13px;
+  background: var(--green); color: #fff; font-weight: 600; font-size: 15px;
+  text-decoration: none; transition: background .15s, transform .12s;
+}
+.hcat-btn:hover { background: var(--green-2, #3b5a45); }
+.hcat-btn:active { transform: scale(.98); }
+.hcat-btn svg { width: 18px; height: 18px; }
+
+.hsearch {
+  flex: 1 1 auto; min-width: 120px; max-width: 560px;
+  display: flex; align-items: center; height: 48px;
+  background: var(--white); border: 1.5px solid var(--line); border-radius: 13px;
+  padding: 0 6px 0 16px; transition: border-color .15s, box-shadow .15s;
+}
+.hsearch:focus-within {
+  border-color: var(--green);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--green) 14%, transparent);
+}
+.hsearch__inp {
+  flex: 1; border: none; background: none; outline: none;
+  font-family: var(--sans); font-size: 15px; color: var(--ink);
+}
+.hsearch__inp::placeholder { color: var(--muted); }
+.hsearch__btn {
+  width: 38px; height: 38px; border-radius: 10px; flex: none;
+  display: grid; place-items: center; border: none; background: none;
+  color: var(--muted); cursor: pointer; transition: color .14s;
+}
+.hsearch__btn:hover { color: var(--green); }
+.hsearch__btn svg { width: 20px; height: 20px; }
+
+.hloc {
+  display: inline-flex; align-items: center; gap: 9px; flex: none;
+  height: 48px; padding: 0 15px; border-radius: 13px;
+  border: 1.5px solid var(--line); background: var(--white);
+  color: var(--ink); text-decoration: none; transition: border-color .15s;
+}
+.hloc:hover { border-color: var(--sand); }
+.hloc > svg { width: 18px; height: 18px; color: var(--clay); flex: none; }
+.hloc__city { font-size: 14px; font-weight: 600; white-space: nowrap; }
+.hloc__div { width: 1px; height: 20px; background: var(--line); }
+.hloc__time { font-size: 13px; color: var(--muted); white-space: nowrap; }
+
+.hcur {
+  display: inline-flex; align-items: center; gap: 7px; flex: none;
+  height: 48px; padding: 0 10px; border: none; background: none;
+  color: var(--ink); font-weight: 600; font-size: 14px;
+  cursor: pointer; font-family: inherit;
+}
+.hcur svg { width: 18px; height: 18px; color: var(--muted); }
+
+.hicons { display: flex; align-items: center; gap: 2px; flex: none; }
+.hicon {
+  position: relative; width: 44px; height: 44px; border-radius: 12px;
+  display: grid; place-items: center; color: var(--ink);
+  background: none; border: none; cursor: pointer; text-decoration: none;
+  transition: background .14s, color .14s;
+}
+.hicon:hover { background: var(--paper-2); color: var(--green); }
+.hicon svg { width: 23px; height: 23px; }
+.hicon .badge {
+  position: absolute; top: 5px; right: 5px;
+  min-width: 18px; height: 18px; padding: 0 4px; border-radius: 9px;
+  background: var(--clay); color: #fff; font-size: 11px; font-weight: 700;
+  display: grid; place-items: center; line-height: 1;
+}
+.hicon .dot {
+  position: absolute; top: 9px; right: 10px;
+  width: 7px; height: 7px; border-radius: 50%; background: var(--clay);
+}
+
+/* ====== РЯД 2: категории ====== */
+.hcats-wrap {
+  position: relative;
+  border-top: 1px solid color-mix(in srgb, var(--line) 70%, transparent);
+}
+.hcats-inner { position: relative; }
+.hcats {
+  display: flex; align-items: center; gap: clamp(16px, 1.8vw, 28px);
+  height: 50px; overflow-x: auto; scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+.hcats::-webkit-scrollbar { display: none; }
+.hcat {
+  display: inline-flex; align-items: center; gap: 4px; flex: none;
+  font-size: 14px; font-weight: 500; color: var(--ink);
+  white-space: nowrap; text-decoration: none; transition: color .14s;
+}
+.hcat:hover { color: var(--green); }
+.hcat--accent { color: var(--clay); }
+.hcat__car { width: 14px; height: 14px; opacity: .6; }
+.hcats__more {
+  position: absolute; right: 0; top: 0; bottom: 0; width: 56px;
+  display: grid; place-items: center; border: none; cursor: pointer;
+  color: var(--ink);
+  background: linear-gradient(90deg, transparent, var(--paper) 42%);
+}
+.hcats__more svg { width: 18px; height: 18px; }
+
+/* ====== адаптив ====== */
+@media (max-width: 1100px) {
+  .hburger { display: inline-flex; }
+  .hloc, .hcur { display: none; }
+  .hbar { gap: 10px; height: 62px; }
+}
+@media (max-width: 760px) {
+  .hcat-btn { padding: 0 13px; }
+  .hcat-btn span, .hcat-btn { font-size: 14px; }
+  .hlogo { font-size: 21px; }
+  .hlogo__ic svg { width: 20px; height: 20px; }
+  .hsearch { max-width: none; height: 44px; }
+  .hicon { width: 40px; height: 40px; }
+  .hcats { height: 46px; }
+}
+@media (max-width: 520px) {
+  .hbar { gap: 8px; }
+  .hcat-btn { display: none; }                 /* «Каталог» — в бургер-меню и нижней навигации */
+  .hsearch { min-width: 0; }                   /* поиску разрешаем ужиматься, чтобы шапка влезала */
+  .hicons > .hicon:nth-child(1),
+  .hicons > .hicon:nth-child(2) { display: none; }  /* избранное и кабинет — в нижней навигации */
+  .hicon { width: 38px; height: 38px; }
+}
+
+/* bump-анимация на корзине */
+.cart-bump { animation: bump .4s ease; }
 @keyframes bump {
   0%   { transform: scale(1); }
   40%  { transform: scale(1.18); }
@@ -162,60 +365,36 @@ const {
 /* overlay + drawer transitions */
 .overlay-fade-enter-active, .overlay-fade-leave-active { transition: opacity .28s; }
 .overlay-fade-enter-from,   .overlay-fade-leave-to     { opacity: 0; }
-
 .drawer-left-enter-active { transition: transform .34s cubic-bezier(.22,1,.36,1); }
 .drawer-left-leave-active { transition: transform .26s ease-in; }
 .drawer-left-enter-from,
 .drawer-left-leave-to     { transform: translateX(-101%); }
 
-/* поиск */
+/* поиск-оверлей */
 .search-overlay {
   position: fixed; inset: 0; z-index: 200;
   background: rgba(20,28,22,.5); backdrop-filter: blur(4px);
   display: flex; align-items: flex-start; justify-content: center;
-  padding: clamp(76px, 12vw, 100px) 14px 18px;
-  overflow-y: auto;
+  padding: clamp(76px, 12vw, 100px) 14px 18px; overflow-y: auto;
 }
 .search-wrap {
   width: min(640px, 92vw); background: var(--white);
-  border-radius: var(--r-md); padding: 24px;
-  box-shadow: var(--sh-pop);
-  max-height: calc(100dvh - 28px);
-  overflow-y: auto;
+  border-radius: var(--r-md); padding: 24px; box-shadow: var(--sh-pop);
+  max-height: calc(100dvh - 28px); overflow-y: auto;
 }
-.header__search-icon { flex: none; color: var(--muted); }
 .header__search-box-icon { flex: none; color: var(--muted); }
 .header__search-clear { width: 32px; height: 32px; }
-.header__account { display: none; }
 .search-box {
   display: flex; align-items: center; gap: 12px;
-  border-bottom: 2px solid var(--green);
-  padding-bottom: 12px; margin-bottom: 20px;
+  border-bottom: 2px solid var(--green); padding-bottom: 12px; margin-bottom: 20px;
 }
 .search-box__input {
   flex: 1; background: none; border: none; outline: none;
   font-family: var(--sans); font-size: 20px; color: var(--ink);
 }
 .search-box__input::placeholder { color: var(--muted); }
-.search-hints { }
-
-@media (min-width: 480px) {
-  .header__account { display: inline-flex; }
-}
-
-@media (min-width: 700px) and (max-width: 1100px) {
-  .header__account { display: none; }
-}
-
 @media (max-width: 699px) {
-  .search-wrap {
-    width: min(100%, 560px);
-    padding: 18px;
-  }
+  .search-wrap { width: min(100%, 560px); padding: 18px; }
   .search-box__input { font-size: 18px; }
-}
-
-@media (min-width: 1101px) {
-  .header__account { display: inline-flex; }
 }
 </style>

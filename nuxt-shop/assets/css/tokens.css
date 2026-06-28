@@ -1,27 +1,27 @@
 /* ============================================================
    spbshop — дизайн-система, вариант A «Сад»
-   Шрифты: Playfair Display (дисплей) + Golos Text (интерфейс)
+   Шрифты: Montserrat (дисплей) + Inter (интерфейс)
    ============================================================ */
 
 /* ---- базовые токены ---- */
 :root {
-  --serif: "Playfair Display", Georgia, serif;
-  --sans: "Golos Text", -apple-system, system-ui, sans-serif;
+  --serif: "Montserrat", system-ui, sans-serif;
+  --sans: "Inter", -apple-system, system-ui, sans-serif;
 
-  --paper:     #F4EEE2;
-  --paper-2:   #EBE2D1;
-  --paper-3:   #E6DCC8;
-  --card:      #FBF7EE;
-  --white:     #FBF8F1;
+  --paper:     #FAFAFA;
+  --paper-2:   #F1F1F2;
+  --paper-3:   #EAEAEC;
+  --card:      #FFFFFF;
+  --white:     #FFFFFF;
   --ink:       #20302A;
   --ink-2:     #2B3D35;
-  --green:     #2E4736;
-  --green-2:   #3B5A45;
-  --clay:      #B6543A;
-  --clay-2:    #9D4530;
+  --green:     #369E4E;
+  --green-2:   #18883A;
+  --clay:      #ED8641;
+  --clay-2:    #D56927;
   --blush:     #F3E4DA;
-  --sand:      #D9CBB2;
-  --line:      #DAD0BE;
+  --sand:      #DCDCDF;
+  --line:      #E6E6E8;
   --line-2:    rgba(255,255,255,.12);
   --muted:     #7C7567;
   --bg-btn-ink: #22332B;
@@ -41,6 +41,7 @@
 
   /* layout */
   --maxw:      1240px;
+  --maxw-wide: 1560px;
   --gut:       clamp(16px, 4vw, 40px);
   --header-h:  64px;
   --topbar-h:  40px;
@@ -52,11 +53,14 @@
 /* ---- ресет и базовые стили ---- */
 *, *::before, *::after { box-sizing: border-box; }
 
-html { scroll-behavior: smooth; }
+html { scroll-behavior: smooth; overflow-x: clip; }
+/* clip (не hidden) — не создаёт скролл-контейнер, поэтому sticky-шапка продолжает работать,
+   но горизонтальный «вылет» больше не расширяет layout viewport и не ломает fixed-оверлеи */
+body { overflow-x: clip; }
 
 body {
   margin: 0;
-  background: var(--paper);
+  background: #FFFFFF;
   color: var(--ink);
   font-family: var(--sans);
   font-size: 16px;

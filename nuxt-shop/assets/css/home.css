@@ -109,6 +109,20 @@
   border: 1px solid color-mix(in srgb, var(--line) 48%, transparent);
 }
 
+/* Чистая премиум-заглушка героя (как в старом макете): мягкий
+   пастельный градиент вместо мутного «цветочного» блоба */
+.hero__media .bloom {
+  background:
+    radial-gradient(120% 90% at 78% 20%, rgba(255,255,255,.55), transparent 58%),
+    linear-gradient(150deg, #F0D8CD 0%, #E7D2DC 46%, #ECE6D4 100%);
+}
+.hero__media .bloom::before { opacity: .045; }
+.hero__media .bloom::after {
+  background:
+    radial-gradient(58% 48% at 30% 22%, rgba(255,255,255,.32), transparent 70%),
+    radial-gradient(120% 110% at 50% 124%, rgba(46,71,54,.14), transparent 62%);
+}
+
 .hero__badge {
   position: absolute;
   left: 16px;

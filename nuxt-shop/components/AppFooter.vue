@@ -3,7 +3,7 @@
     <div class="container">
       <div class="footer__top">
         <div class="footer__brand">
-          <div class="footer__logo">{{ settings.storeName }}<b>.</b></div>
+          <div class="footer__logo">Бутон<b>.</b></div>
           <p>{{ settings.storeTagline }} в {{ settings.storeCity }}. Собираем букеты в день заказа из свежих сезонных цветов.</p>
         </div>
 
@@ -15,6 +15,7 @@
             <NuxtLink to="/holiday">Праздники</NuxtLink>
             <NuxtLink to="/gift-cards">Подарочные решения</NuxtLink>
             <NuxtLink to="/wishlist">Избранное</NuxtLink>
+            <NuxtLink to="/loyalty">Клуб «Бутон»</NuxtLink>
             <NuxtLink to="/orders/track">Отследить заказ</NuxtLink>
           </div>
           <div class="footer__col">

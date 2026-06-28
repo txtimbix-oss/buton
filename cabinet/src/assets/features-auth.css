@@ -1,82 +1,187 @@
-/* Auth screens (login/register/forgot/reset) — sliced out of layout.css,
-   features-account.css and responsive.css (route-domain split).
-   Order preserved to keep the original cascade. */
+/* Auth screens (login/register/forgot/reset) — по компактному макету «Регистрация Бутон».
+   Десктоп: страница строго в высоту экрана (height:100vh; overflow:hidden) — без скролла. */
 
-.auth-card {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: 40px;
-  width: 100%;
-  max-width: 420px;
-  box-shadow: var(--shadow-md);
+.auth-wrap {
+  display: grid;
+  min-height: 100vh;
+  font-family: 'Manrope', var(--sans);
+  color: #1c1a19;
+  background: #fbf8f5;
+}
+@media (min-width: 1024px) {
+  .auth-wrap { grid-template-columns: 1fr 1fr; height: 100vh; overflow: hidden; }
+}
+
+/* ── левая колонка ── */
+.auth-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24px 40px 18px;
+  gap: 16px;
+}
+@media (max-width: 1023px) {
+  .auth-col { justify-content: flex-start; padding: 28px 20px; }
 }
 
 .auth-logo {
   font-family: var(--serif);
   font-size: 28px;
-  font-weight: 600;
-  color: var(--ink);
-  margin-bottom: 28px;
-  text-align: center;
-  letter-spacing: -0.02em;
-}
-.auth-logo span { color: var(--clay); }
-
-.auth-title {
-  font-family: var(--serif);
-  font-size: 28px;
-  font-weight: 500;
-  margin-bottom: 6px;
-  line-height: 1.1;
+  font-weight: 700;
   letter-spacing: -0.01em;
+  color: #1c1a19;
+  text-decoration: none;
+  flex: none;
+}
+.auth-logo b { color: #e07a3f; font-weight: 700; }
+
+/* ── карточка ── */
+.auth-card {
+  width: 100%;
+  max-width: 520px;
+  background: #fff;
+  border: 1px solid #efe7df;
+  border-radius: 22px;
+  padding: 26px 40px 28px;
+  box-shadow: 0 24px 60px -32px rgba(120, 70, 40, 0.28);
+}
+@media (max-width: 560px) { .auth-card { padding: 24px 22px; border-radius: 18px; } }
+
+/* бейдж «300 бонусов» (.eyebrow в AuthIntroBlock) */
+.auth-card .eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #b15a26;
+  background: #fdeee2;
+  border: 1px solid #f7dcc6;
+  padding: 6px 13px;
+  border-radius: 999px;
+  margin-bottom: 14px;
+  letter-spacing: 0;
+  text-transform: none;
+}
+.auth-card .eyebrow::before {
+  content: '';
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: #e07a3f;
+  flex: none;
 }
 
-.auth-sub {
-  font-size: 14px;
-  color: var(--ink-2);
-  margin-bottom: 28px;
+.auth-card h1 {
+  font-family: var(--serif);
+  font-size: 30px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.1;
+  margin: 0 0 4px;
+  color: #1c1a19;
+}
+.auth-card .lead { font-size: 14px; color: #8a817a; margin: 0 0 18px; }
+
+/* ── поля ── */
+.auth-card .row-2 { display: grid; grid-template-columns: 1fr; gap: 14px; }
+@media (min-width: 480px) { .auth-card .row-2 { grid-template-columns: 1fr 1fr; } }
+
+.auth-card .field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 13px; }
+.auth-card .field > span { font-size: 13px; font-weight: 600; color: #2a2622; margin: 0; }
+.auth-card .field .hint { font-weight: 500; color: #a79e96; }
+
+.auth-card .input,
+.auth-card .select,
+.auth-card .textarea {
+  width: 100%;
+  font-family: inherit;
+  font-size: 14.5px;
+  color: #1c1a19;
+  background: #faf7f4;
+  border: 1.5px solid #ece3da;
+  border-radius: 11px;
+  padding: 11px 14px;
+  outline: none;
+  transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
+}
+.auth-card .input::placeholder { color: #b3aaa2; }
+.auth-card .input:focus,
+.auth-card .select:focus,
+.auth-card .textarea:focus {
+  border-color: #e07a3f;
+  background: #fff;
+  box-shadow: 0 0 0 4px rgba(224, 122, 63, 0.12);
 }
 
-.auth-footer {
-  margin-top: 20px;
+/* ── кнопка ── */
+.auth-card .btn--auth,
+.auth-card form > .btn {
+  width: 100%;
+  font-family: inherit;
+  font-size: 15.5px;
+  font-weight: 700;
+  color: #fff;
+  background: #e07a3f;
+  border: none;
+  border-radius: 12px;
+  padding: 14px;
+  cursor: pointer;
+  margin-top: 6px;
+  transition: background 0.15s, transform 0.08s, box-shadow 0.15s;
+  box-shadow: 0 12px 26px -12px rgba(224, 122, 63, 0.7);
+}
+.auth-card .btn--auth:hover,
+.auth-card form > .btn:hover { background: #d06a30; }
+.auth-card .btn--auth:active,
+.auth-card form > .btn:active { transform: translateY(1px); }
+.auth-card .btn--auth:disabled { opacity: 0.6; cursor: default; }
+
+/* мелкий текст */
+.auth-card .fineprint {
   text-align: center;
-  font-size: 14px;
-  color: var(--ink-2);
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: #a79e96;
+  margin-top: 14px;
 }
+.auth-card .fineprint a { color: #b15a26; text-decoration: none; }
 
-.auth-footer a { color: var(--green); font-weight: 500; }
-.auth-footer a:hover { text-decoration: underline; }
-
-/* ── Авторизация (split-layout) ── */
-.auth-wrap { min-height: 100vh; display: grid; }
-@media (min-width: 1024px) { .auth-wrap { grid-template-columns: 1fr 1fr; } }
-.auth-side { display: none; position: relative; }
-.auth-side__quote { position: absolute; inset: 0; display: flex; align-items: flex-end; padding: 48px; }
-.auth-side__quote p {
-  font-family: var(--serif); font-style: italic; font-size: 28px;
-  color: #fff; text-shadow: 0 2px 20px rgba(0,0,0,.35); max-width: 22ch;
+/* «Уже есть аккаунт? Войти» */
+.auth-below {
+  font-size: 14.5px;
+  color: #6f655d;
+  text-align: center;
+  flex: none;
+  margin: 0;
 }
+.auth-below a { color: #e07a3f; font-weight: 700; text-decoration: none; }
+.auth-below a:hover { text-decoration: underline; }
+
+/* ── правая колонка: фото + затемнение + цитата ── */
+.auth-side { display: none; position: relative; overflow: hidden; }
 @media (min-width: 1024px) { .auth-side { display: block; } }
-.auth-col {
-  display: flex; flex-direction: column;
-  align-items: center; justify-content: flex-start;
-  padding: 40px 20px 60px;
+.auth-side__img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.auth-side__scrim {
+  position: absolute; inset: 0;
+  background: linear-gradient(180deg, rgba(40, 20, 30, 0.12) 0%, rgba(40, 18, 28, 0.1) 45%, rgba(60, 25, 40, 0.55) 100%);
 }
-.auth-logo { font-family: var(--serif); font-size: 30px; font-weight: 700; margin: 8px 0 28px; }
-.auth-logo b { color: var(--clay); }
-/* .auth-card base — определён выше, здесь добавляем пару правил */
-.auth-card h1 { font-family: var(--serif); font-size: 28px; margin-bottom: 4px; }
-.auth-card .eyebrow { display: block; margin-bottom: 8px; }
-.auth-card .lead { color: var(--muted); font-size: 14px; margin-bottom: 20px; }
-.auth-below { margin-top: 18px; font-size: 14px; color: var(--muted); text-align: center; }
-.auth-below a { color: var(--clay); font-weight: 600; }
-
-/* ── Bloom-фоны декоративной колонки ── */
-.auth-bloom-cream { background: radial-gradient(circle at 35% 30%, #FBF3DC 0%, #ECDCB4 55%, #DBC892 100%); }
-.auth-bloom-rose  { background: radial-gradient(circle at 35% 30%, #F3B9C8 0%, #DD7F9C 55%, #C25C7F 100%); }
-.auth-bloom-lav   { background: radial-gradient(circle at 35% 30%, #DAC9EC 0%, #B49BD6 55%, #9277BE 100%); }
-
-@media (max-width: 768px) {
-  .auth-card { padding: 28px 20px; }
+.auth-side__quote { position: absolute; left: 56px; right: 56px; bottom: 64px; color: #fff; }
+.auth-side__q {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 34px;
+  line-height: 1.32;
+  font-weight: 500;
+  letter-spacing: 0.005em;
+  text-shadow: 0 2px 24px rgba(0, 0, 0, 0.3);
+}
+.auth-side__cap {
+  margin-top: 18px;
+  font-family: 'Manrope', var(--sans);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  opacity: 0.85;
 }

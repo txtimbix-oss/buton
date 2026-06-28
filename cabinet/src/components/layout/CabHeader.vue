@@ -8,7 +8,7 @@
           <line x1="3" y1="18" x2="21" y2="18"></line>
         </svg>
       </button>
-      <RouterLink to="/dashboard" class="cab-header__logo">spb<b>shop</b></RouterLink>
+      <RouterLink to="/dashboard" class="cab-header__logo">Бутон<b>.</b></RouterLink>
       <span class="cab-header__sub">/ Личный кабинет</span>
       <span class="cab-header__spacer"></span>
       <a :href="shopUrl" class="btn btn--ghost cab-tosite">

@@ -5,25 +5,25 @@
   --sans:  "Golos Text", -apple-system, system-ui, sans-serif;
 
   /* палитра */
-  --paper:    #F4EEE2;
-  --paper-2:  #EBE2D1;
-  --paper-3:  #E6DCC8;
-  --card:     #FBF7EE;
-  --white:    #FBF8F1;
+  --paper:    #F6F6F7;
+  --paper-2:  #EFEFF1;
+  --paper-3:  #E8E8EB;
+  --card:     #FFFFFF;
+  --white:    #FFFFFF;
   --ink:      #20302A;
   --ink-2:    #2B3D35;
   --green:    #2E4736;
   --green-2:  #3B5A45;
-  --clay:     #B6543A;
-  --clay-2:   #C9785C;
-  --blush:    #F3E4DA;
-  --sand:     #D9CBB2;
-  --line:     rgba(32,48,42,0.16);
-  --line-2:   #DDD6C6;
+  --clay:     #ED8641;
+  --clay-2:   #D56927;
+  --blush:    #F4E7E0;
+  --sand:     #DCDCDF;
+  --line:     rgba(32,48,42,0.13);
+  --line-2:   #E4E4E7;
   --muted:    rgba(32,48,42,0.58);
 
   /* алиасы обратной совместимости */
-  --border:   #E4DDD0;
+  --border:   #E6E6E9;
   --green-l:  #3D6B50;
 
   /* статусные */

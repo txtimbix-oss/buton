@@ -1,4 +1,5 @@
-import { onMounted, onUnmounted } from 'vue'
+import { onMounted, onUnmounted, watch } from 'vue'
+import { useRoute } from 'vue-router'
 
 const DESIGN_WIDTH_PX = 1320
 const ZOOM_PROBE_LAYOUT_THRESHOLD_PX = 150
@@ -37,7 +38,17 @@ function applyDocumentRootScale(root: HTMLElement, viewportWidth: number) {
 }
 
 export function useRootViewportScale() {
+  const route = useRoute()
+
+  // Страницы авторизации (meta.public) — полноэкранный дизайн на 100vh.
+  // Зум фикс-макета 1320px их ломает (раздувает выше экрана), поэтому на них скейл выключаем.
+  const isFullscreenRoute = () => Boolean(route?.meta?.public)
+
   const handleResize = () => {
+    if (isFullscreenRoute()) {
+      resetDocumentRootStyles(document.documentElement)
+      return
+    }
     applyDocumentRootScale(document.documentElement, window.innerWidth)
   }
 
@@ -45,6 +56,9 @@ export function useRootViewportScale() {
     handleResize()
     window.addEventListener('resize', handleResize)
   })
+
+  // пересчитываем при переходе auth <-> кабинет
+  watch(() => route?.fullPath, handleResize)
 
   onUnmounted(() => {
     window.removeEventListener('resize', handleResize)

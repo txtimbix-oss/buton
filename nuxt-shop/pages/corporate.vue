@@ -209,7 +209,7 @@ const { benefits, formats, form, errors, loading, sent, apiError, submit } = use
 }
 .corp-form__title {
   font-size: 42px;
-  color: #FBF7EE;
+  color: #FFFFFF;
   margin-bottom: 16px;
 }
 .corp-form__desc {
