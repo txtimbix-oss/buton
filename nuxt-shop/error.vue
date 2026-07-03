@@ -29,7 +29,7 @@
 
 <script setup lang="ts">
 defineProps<{ error?: { statusCode?: number; statusMessage?: string } | null }>()
-useHead({ title: 'Страница не найдена — spbshop' })
+useHead({ title: 'Страница не найдена — Бутон' })
 </script>
 
 <style scoped>

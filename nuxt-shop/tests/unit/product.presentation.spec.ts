@@ -37,7 +37,7 @@ describe('product presentation helpers', () => {
     })
   })
 
-  it('falls back to first size, default shelf life, and default packaging when signals are absent', () => {
+  it('returns empty strings (not invented defaults) when signals are absent', () => {
     const product = makeProduct({
       price: 4300,
       tag: 'Коллекция',
@@ -52,14 +52,15 @@ describe('product presentation helpers', () => {
       composition: [],
     })
 
+    // нет реальных сигналов → пустые строки, карточка скрывает эти строки
     expect(buildProductPresentation(product)).toMatchObject({
       primarySizeLabel: 'L',
       primarySizePrice: 7300,
       compositionSummary: '',
-      shelfLife: 'до 7 дней (стандартно)',
+      shelfLife: '',
       sizeHeight: '40 см',
-      sizeWeight: '—',
-      packagingHint: 'крафт + лента',
+      sizeWeight: '',
+      packagingHint: '',
       isTopPick: false,
       isPopular: false,
     })
@@ -74,10 +75,10 @@ describe('product presentation helpers', () => {
     })
 
     expect(buildProductPresentation(product)).toMatchObject({
-      primarySizeLabel: '—',
+      primarySizeLabel: '',
       primarySizePrice: 5100,
-      sizeHeight: '—',
-      sizeWeight: '—',
+      sizeHeight: '',
+      sizeWeight: '',
       isPopular: true,
     })
   })

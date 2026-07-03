@@ -40,13 +40,14 @@
       <div v-if="compositionSummary" class="card__composition">
         <span>Состав: {{ compositionSummary }}</span>
       </div>
-      <div class="card__specs">
-        <div><strong>Размер</strong> {{ primarySizeLabel }}</div>
-        <div><strong>Цена за набор</strong> {{ formatRub(primarySizePrice) }}</div>
-        <div><strong>Срок стояния</strong> {{ shelfLife }}</div>
-        <div><strong>Высота</strong> {{ sizeHeight }}</div>
-        <div><strong>Вес</strong> {{ sizeWeight }}</div>
-        <div><strong>Упаковка</strong> {{ packagingHint }}</div>
+      <!-- рисуем только то, что реально есть в данных (пустые строки и «—» не показываем) -->
+      <div v-if="primarySizeLabel || shelfLife || sizeHeight || sizeWeight || packagingHint" class="card__specs">
+        <div v-if="primarySizeLabel"><strong>Размер</strong> {{ primarySizeLabel }}</div>
+        <div v-if="primarySizeLabel"><strong>Цена за набор</strong> {{ formatRub(primarySizePrice) }}</div>
+        <div v-if="shelfLife"><strong>Срок стояния</strong> {{ shelfLife }}</div>
+        <div v-if="sizeHeight"><strong>Высота</strong> {{ sizeHeight }}</div>
+        <div v-if="sizeWeight"><strong>Вес</strong> {{ sizeWeight }}</div>
+        <div v-if="packagingHint"><strong>Упаковка</strong> {{ packagingHint }}</div>
       </div>
       <div class="card__features">
         <span v-for="badge in serviceBadges" :key="badge" class="tag tag--clay card__feature-tag">{{ badge }}</span>

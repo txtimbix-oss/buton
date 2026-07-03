@@ -94,7 +94,7 @@
                   <span class="lbl">фото букета</span>
                 </div>
                 <span v-if="p.tag" class="tag" :class="tagLab(p)[0]">{{ tagLab(p)[1] }}</span>
-                <button class="like" :class="{ on: likes[p.id] }" @click.prevent="toggleLike(p.id)">
+                <button class="like" :class="{ on: isWished(p.slug) }" @click.prevent="toggleWish(p.slug)">
                   <span v-html="I.heart" />
                 </button>
                 <button class="quick" @click.prevent>
@@ -242,9 +242,10 @@ watch(() => route.query, (Q) => {
   page.value = 1
 })
 
-const likes = reactive({})
+const wishlist = useWishlist()
+const isWished = slug => wishlist.slugs.value.includes(slug)
+const toggleWish = slug => { if (slug) wishlist.toggle(slug) }
 const drawer = ref(false)
-const toggleLike = id => { likes[id] = !likes[id] }
 const quickCard = ref(null)
 const onCardClick = (e, p) => {
   if (e.target.closest('.like')) { e.preventDefault(); return }

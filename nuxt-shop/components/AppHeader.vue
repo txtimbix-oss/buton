@@ -99,7 +99,7 @@
         </div>
             <div class="menu__contact">
               <a :href="`tel:${settings.contactPhone}`">{{ settings.contactPhone }}</a>
-              <a v-if="settings.socialTg" :href="settings.socialTg" target="_blank" rel="noopener">Telegram · @spbshop</a>
+              <a v-if="settings.socialTg" :href="settings.socialTg" target="_blank" rel="noopener">Telegram{{ tgHandle ? ' · @' + tgHandle : '' }}</a>
             </div>
           </div>
           <div class="drawer__foot">
@@ -163,6 +163,8 @@ const router     = useRouter()
 const { cartCount } = useCart()
 const { count: wishCount } = useWishlist()
 const settings   = useSettings()
+// хэндл телеграма — из ссылки в настройках (t.me/<handle>), не хардкод
+const tgHandle = computed(() => (settings.value.socialTg || '').match(/t\.me\/([\w+]+)/)?.[1] || '')
 const { user: shopUser } = useShopUser()
 const cartDrawer = useCartDrawer()
 

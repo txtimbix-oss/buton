@@ -3,7 +3,7 @@ export default defineEventHandler(async event => {
   setHeader(event, 'Cache-Control', 'public, max-age=3600')
 
   const config  = useRuntimeConfig(event)
-  const siteUrl = (config.public.siteUrl as string || 'https://spbshop.ru').replace(/\/+$/, '')
+  const siteUrl = (config.public.siteUrl as string || 'https://butonshop.ru').replace(/\/+$/, '')
   const apiBase = (config.apiBase as string || 'http://localhost:3001')
 
   // Статические страницы

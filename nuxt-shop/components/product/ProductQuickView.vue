@@ -29,12 +29,13 @@
           <div class="qv__features">
             <span v-for="badge in serviceBadges" :key="`qv-${badge}`" class="tag tag--clay card__feature-tag">{{ badge }}</span>
           </div>
-          <div class="qv__features qv__features--specs">
-            <span class="tag tag--clay card__feature-tag">Размер {{ primarySizeLabel }}</span>
-            <span class="tag tag--clay card__feature-tag">Цена за набор {{ formatRub(primarySizePrice) }}</span>
-            <span class="tag tag--clay card__feature-tag">Срок {{ shelfLife }}</span>
-            <span class="tag tag--clay card__feature-tag">Высота {{ sizeHeight }}</span>
-            <span class="tag tag--clay card__feature-tag">Вес {{ sizeWeight }}</span>
+          <!-- рисуем только то, что реально есть в данных -->
+          <div v-if="primarySizeLabel || shelfLife || sizeHeight || sizeWeight" class="qv__features qv__features--specs">
+            <span v-if="primarySizeLabel" class="tag tag--clay card__feature-tag">Размер {{ primarySizeLabel }}</span>
+            <span v-if="primarySizeLabel" class="tag tag--clay card__feature-tag">Цена за набор {{ formatRub(primarySizePrice) }}</span>
+            <span v-if="shelfLife" class="tag tag--clay card__feature-tag">Срок {{ shelfLife }}</span>
+            <span v-if="sizeHeight" class="tag tag--clay card__feature-tag">Высота {{ sizeHeight }}</span>
+            <span v-if="sizeWeight" class="tag tag--clay card__feature-tag">Вес {{ sizeWeight }}</span>
           </div>
           <div class="qv__sizes">
             <button

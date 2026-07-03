@@ -13,10 +13,11 @@ interface ProductPresentation {
   isPopular: boolean
 }
 
+/* пустая строка = данных нет; карточка такие строки скрывает (не рисуем «—» и не выдумываем) */
 function parseSizeMeta(sizeDesc = '') {
   const line = sizeDesc.toLowerCase()
-  const height = line.match(/(\d+\s*(?:см|cm))/i)?.[0] ?? '—'
-  const weight = line.match(/(\d+(?:[.,]\d+)?\s*(?:кг|kg|г|гр|gram|grams))/i)?.[0] ?? '—'
+  const height = line.match(/(\d+\s*(?:см|cm))/i)?.[0] ?? ''
+  const weight = line.match(/(\d+(?:[.,]\d+)?\s*(?:кг|kg|г|гр|gram|grams))/i)?.[0] ?? ''
   return { height, weight }
 }
 
@@ -36,7 +37,7 @@ function deriveCompositionSummary(product: Product): string {
 function deriveShelfLife(product: Product): string {
   const text = `${product.careInstructions ?? ''} ${product.description ?? ''}`.toLowerCase()
   if (text.includes('7 дней') || text.includes('до 7') || text.includes('недель')) return 'до 7 дней'
-  return 'до 7 дней (стандартно)'
+  return ''
 }
 
 function derivePackagingHint(product: Product): string {
@@ -44,7 +45,7 @@ function derivePackagingHint(product: Product): string {
   if (source.includes('премиум')) return 'премиум-упаковка'
   if (source.includes('крафт')) return 'крафт + лента'
   if (source.includes('стекл') || source.includes('короб')) return 'стекло/коробка'
-  return 'крафт + лента'
+  return ''
 }
 
 export function buildProductPresentation(product: Product): ProductPresentation {
@@ -54,7 +55,7 @@ export function buildProductPresentation(product: Product): ProductPresentation 
 
   return {
     primarySize,
-    primarySizeLabel: primarySize?.label ?? '—',
+    primarySizeLabel: primarySize?.label ?? '',
     primarySizePrice: primarySize?.price ?? product.price,
     compositionSummary: deriveCompositionSummary(product),
     shelfLife: deriveShelfLife(product),

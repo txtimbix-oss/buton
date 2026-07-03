@@ -5,9 +5,15 @@ function optionalHeader(event: Parameters<typeof getRequestHeader>[0], name: str
   return value && value.trim() ? value : undefined
 }
 
+/* Локальные Nitro-роуты (server/api/**) — их проксировать нельзя,
+   иначе запрос улетает на бэк, где таких путей нет (404),
+   и, например, настройки магазина падают в дефолты («spbshop»). */
+const LOCAL_API_PREFIXES = ['/api/app-settings', '/api/dadata/']
+
 export default defineEventHandler(async (event) => {
   const path = event.path
   if (!path.startsWith('/api/') && !path.startsWith('/uploads/')) return
+  if (LOCAL_API_PREFIXES.some(prefix => path.startsWith(prefix))) return
 
   const config = useRuntimeConfig(event)
   const apiBase = config.apiBase

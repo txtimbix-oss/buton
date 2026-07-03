@@ -286,7 +286,6 @@
             <button v-else class="cqv-cta" @click="addToCart">
               В корзину<span class="cqv-cta-p">{{ fmt(total) }} ₽</span>
             </button>
-            <NuxtLink class="cqv-cta cqv-cta--ghost" :to="fullLink" @click="close">Купить сейчас</NuxtLink>
           </div>
         </div>
       </div>
@@ -765,8 +764,9 @@ onBeforeUnmount(() => {
 .cqv-card-meta { display: flex; justify-content: space-between; font-size: 12px; color: var(--ink-faint); margin-top: 6px; }
 
 /* допы */
-.cqv-addons { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+.cqv-addons { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
 .cqv-addon {
+  min-width: 0;
   display: flex; align-items: center; gap: 10px; padding: 9px 11px;
   border: 1px solid var(--line-strong); border-radius: 12px; background: var(--card);
   cursor: pointer; text-align: left; font-family: inherit; transition: .14s;
@@ -882,11 +882,6 @@ onBeforeUnmount(() => {
 .cqv-cta svg { width: 18px; height: 18px; }
 .cqv-cta-p { font-weight: 700; font-variant-numeric: tabular-nums; }
 .cqv-cta.is-added { background: var(--green-soft); }
-.cqv-cta--ghost {
-  flex: none; min-width: 150px; background: var(--card); color: var(--ink);
-  border: 1px solid var(--line-strong); box-shadow: none;
-}
-.cqv-cta--ghost:hover { background: var(--paper); border-color: var(--green-soft); color: var(--green); }
 
 /* ---- мобайл: bottom-sheet ---- */
 @media (max-width: 760px) {
@@ -902,11 +897,9 @@ onBeforeUnmount(() => {
   .cqv-rel { grid-template-columns: repeat(2, 1fr); }
   .cqv-bar { padding: 12px 16px calc(12px + env(safe-area-inset-bottom)); flex-wrap: wrap; }
   .cqv-cta { font-size: 14.5px; }
-  .cqv-cta--ghost { flex: 1; min-width: 0; }
 }
 @media (max-width: 420px) {
   .cqv-addons { grid-template-columns: 1fr; }
-  .cqv-bar .cqv-cta--ghost { display: none; }
 }
 
 /* ---- transitions ---- */

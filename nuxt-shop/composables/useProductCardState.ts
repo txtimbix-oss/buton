@@ -52,21 +52,15 @@ export function useProductCardState(
   const packagingHint = computed(() => presentation.value.packagingHint)
 
   const serviceBadges = computed(() => {
-    const badges = [...SERVICE_BADGE_FALLBACK]
-    const seen = new Set(badges)
+    // API-first: USP-заголовки из настроек бэка; хардкод — только аварийный фолбэк.
+    // Раньше склеивали то и другое → почти-дубли («Гарантия 7 дней» + «Гарантия свежести 7 дней»).
     const fromSettings = [
       settings().usp1Title,
       settings().usp2Title,
       settings().usp3Title,
       settings().usp4Title,
     ].filter((value): value is string => Boolean(value))
-    for (const text of fromSettings) {
-      if (!seen.has(text)) {
-        badges.push(text)
-        seen.add(text)
-      }
-    }
-    return badges
+    return fromSettings.length ? fromSettings : [...SERVICE_BADGE_FALLBACK]
   })
 
   const tagClass = computed(() => {

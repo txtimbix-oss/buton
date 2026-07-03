@@ -145,7 +145,7 @@
           </div>
           <NuxtLink v-if="added" class="btn-primary" to="/cart" style="text-decoration:none">Перейти в корзину →</NuxtLink>
           <button v-else class="btn-primary" @click="addToCart">В корзину<span class="pr tnum">{{ fmt(total) }} ₽</span></button>
-          <button :class="['icon-square', { on: wished }]" @click="wished = !wished"><span class="ic" v-html="I.heart"></span></button>
+          <button :class="['icon-square', { on: wished }]" @click="wishlist.toggle(String(route.params.slug))"><span class="ic" v-html="I.heart"></span></button>
         </div>
         <div class="loyal-line">
           <span class="ic" v-html="I.star"></span>
@@ -247,7 +247,7 @@
               <img v-if="p.img" :src="p.img" :alt="p.n" class="media-img" />
               <div v-else class="ph" style="position:absolute;inset:0"><span class="lbl">фото букета</span></div>
               <span v-if="p.tag" :class="['tag', p.tag[0]]">{{ p.tag[1] }}</span>
-              <button class="like" @click.prevent><span class="ic" v-html="I.heart"></span></button>
+              <button class="like" :class="{ on: isWished(p.slug) }" @click.prevent="p.slug && wishlist.toggle(p.slug)"><span class="ic" v-html="I.heart"></span></button>
             </div>
             <div class="pb">
               <div class="pn">{{ p.n }}</div>
@@ -281,6 +281,8 @@ import { createCartLine } from '~/lib/cart/createCartLine'
 /* ---------------- fetch real product by slug ---------------- */
 const route = useRoute()
 const cart = useCart()
+const wishlist = useWishlist()
+const isWished = slug => wishlist.slugs.value.includes(slug)
 const { data: product } = await useFetch(() => '/api/products/' + route.params.slug, { default: () => null })
 /* отзывы товара с бэка */
 const { data: reviewsRaw } = await useFetch(() => '/api/reviews/product/' + route.params.slug, { default: () => [] })
@@ -539,7 +541,7 @@ const cardDesign = ref('mini')
 const cardText = ref('')
 const addons = ref({})
 const qty = ref(1)
-const wished = ref(false)
+const wished = computed(() => wishlist.slugs.value.includes(String(route.params.slug)))
 const added = ref(false)
 
 /* default selected size = recommended (or first); re-sync when product loads */
