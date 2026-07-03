@@ -1,4 +1,5 @@
 import { computed, getCurrentScope, onScopeDispose, ref, watch, type Ref } from 'vue'
+import { apiUrl } from '@/api/client'
 import { normalizeCabinetApiError } from '@/api/errors'
 import { createPublicBotGuard } from '@/utils/publicBotGuard'
 
@@ -72,7 +73,7 @@ export function useChatOfflineSupport(isOpen: Ref<boolean>, isConnected: Ref<boo
     offlineError.value = ''
 
     try {
-      const response = await fetch('/api/inquiries', {
+      const response = await fetch(apiUrl('/api/inquiries'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', ...offlineBotGuard.headers() },
         body: JSON.stringify(offlineBotGuard.withBody({

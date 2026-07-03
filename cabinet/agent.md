@@ -8,6 +8,8 @@
 - API/contracts разделены понятнее;
 - скрытые shared-state точки вынесены в явные stores;
 - тесты и build на текущем состоянии проходят.
+- Cabinet is a static SPA in production; API and Socket.IO are direct browser calls to `https://api.butonshop.ru` with credentials.
+- If chat connects to `api.spbapp.ru`, production env/deploy is stale.
 
 Проверено на текущем состоянии:
 - `cd cabinet && npm run build`

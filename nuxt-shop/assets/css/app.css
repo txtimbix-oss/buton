@@ -167,6 +167,7 @@
 
 /* ---------- Подвал ---------- */
 .footer { background: var(--ink); color: var(--blush); margin-top: 72px; }
+@media (max-width: 520px) { .footer { margin-top: 40px; } }
 .footer__top {
   display: grid; gap: 36px; padding-block: 56px;
   grid-template-columns: 1fr;

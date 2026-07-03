@@ -276,9 +276,11 @@
 
 <script setup>
 import { h } from 'vue'
+import { createCartLine } from '~/lib/cart/createCartLine'
 
 /* ---------------- fetch real product by slug ---------------- */
 const route = useRoute()
+const cart = useCart()
 const { data: product } = await useFetch(() => '/api/products/' + route.params.slug, { default: () => null })
 /* отзывы товара с бэка */
 const { data: reviewsRaw } = await useFetch(() => '/api/reviews/product/' + route.params.slug, { default: () => [] })
@@ -570,6 +572,18 @@ function toggleAddon(id) {
   addons.value = { ...addons.value, [id]: !addons.value[id] }
 }
 function addToCart() {
+  const chosenAddons = ADDONS.value.filter(a => addons.value[a.id]).map(a => a.name)
+  cart.addLine(createCartLine({
+    slug: String(route.params.slug),
+    name: title.value,
+    bloom: product.value?.bloom || 'rose',
+    image: mainImage.value || undefined,
+    meta: sizeObj.value.name || subtitle.value,
+    sizeLabel: sizeObj.value.name || '',
+    price: unit.value,
+    qty: qty.value,
+    addons: chosenAddons,
+  }))
   added.value = true
 }
 watch([size, qty, () => JSON.stringify(addons.value), occasion], () => {

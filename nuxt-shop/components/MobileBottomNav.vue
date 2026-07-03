@@ -18,10 +18,10 @@
       <span v-if="wishCount > 0" class="badge">{{ wishCount }}</span>
       Избранное
     </NuxtLink>
-    <a :href="userLink">
+    <NuxtLink :to="userLink" :class="['', route.path === '/account' ? 'is-active' : '']">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-3.5 3.6-6 8-6s8 2.5 8 6"/></svg>
       Кабинет
-    </a>
+    </NuxtLink>
   </nav>
 </template>
 
@@ -31,10 +31,7 @@ import { catalogNav } from '~/constants/shopNav'
 const route = useRoute()
 const { cartCount } = useCart()
 const { count: wishCount } = useWishlist()
-const { public: { cabinetUrl } } = useRuntimeConfig()
-const { user: shopUser } = useShopUser()
 
-const userLink = computed(() =>
-  shopUser.value ? `${cabinetUrl}/dashboard` : `${cabinetUrl}/login?redirect=/dashboard`
-)
+// Профиль теперь — внутренняя страница сайта /account
+const userLink = '/account'
 </script>

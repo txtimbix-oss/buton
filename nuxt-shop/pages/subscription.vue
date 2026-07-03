@@ -11,7 +11,10 @@
         <p>Букет приезжает к вашему дню без напоминаний и забот. Меняйте состав, ставьте на паузу или отменяйте в один клик.</p>
         <a class="btn-primary" href="#plans" style="text-decoration:none">Выбрать тариф</a>
       </div>
-      <div class="s-media ph"><span class="lbl">фото · букет недели</span></div>
+      <div class="s-media" :class="{ ph: !weekImg }">
+        <img v-if="weekImg" :src="weekImg" alt="Букет недели" class="s-media__img" />
+        <span v-else class="lbl">фото · букет недели</span>
+      </div>
     </div>
 
     <div class="sec">
@@ -118,6 +121,17 @@ const selectedLabel = computed(() => {
 function selectPlan(plan) {
   selectedPlan.value = plan.name
 }
+
+/* «букет недели» — реальное фото товара с бэка (предпочитаем featured) */
+const { data: weekPool } = await useFetch('/api/products/catalog', {
+  query: { limit: 12, inStockOnly: true },
+  default: () => ({ items: [] }),
+})
+const weekImg = computed(() => {
+  const items = (weekPool.value?.items || []).filter(p => p && p.images && p.images[0])
+  const feat = items.find(p => p.featured)
+  return (feat && feat.images[0]) || (items[0] && items[0].images[0]) || ''
+})
 </script>
 
 <style scoped>
@@ -174,6 +188,7 @@ function selectPlan(plan) {
 .s-hero p{color:var(--ink-soft);font-size:17px;margin:18px 0 26px;max-width:44ch;line-height:1.5;}
 .s-hero .pill{display:inline-flex;align-items:center;gap:8px;background:var(--clay-wash);color:var(--clay);font-weight:600;font-size:13.5px;padding:7px 14px;border-radius:30px;margin-bottom:18px;}
 .s-media{position:relative;height:100%;min-height:380px;border-radius:var(--r);overflow:hidden;border:1px solid var(--line);box-shadow:var(--shadow-lg);}
+.s-media__img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;}
 .sec{margin-top:70px;}
 .sec .sh{text-align:center;margin-bottom:30px;}
 .sec .sh .eyebrow{font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--green-soft);font-weight:600;margin-bottom:10px;}

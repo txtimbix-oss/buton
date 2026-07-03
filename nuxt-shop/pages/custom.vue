@@ -178,8 +178,14 @@ import { ref, computed, onMounted, watch } from 'vue'
 
 useSeoMeta({ title: 'Конструктор букета — Бутон' })
 
-/* ============================ DATA ============================ */
-const FLOWERS = [
+/* ============================ DATA (API-first + fallback) ============================ */
+/* Каталог конструктора с бэка. Пока прод-БД не мигрирована на v2 (нет цветов зелени/
+   бумаги/лент и пресетов) — используем фолбэк-каталог; id совпадают с v2, поэтому после
+   миграции подхватывается автоматически без правок. */
+const { data: bbOptions } = await useFetch('/api/bouquet-builder/options', { default: () => ({}) })
+const opt = computed(() => bbOptions.value || {})
+
+const FALLBACK_FLOWERS = [
   { id: 'peony',     name: 'Пионы',          price: 450, color: 'oklch(0.84 0.07 18)',  core: 'oklch(0.72 0.1 22)' },
   { id: 'ranunculus',name: 'Ранункулюс',     price: 180, color: 'oklch(0.93 0.05 88)',  core: 'oklch(0.82 0.09 75)' },
   { id: 'sprayrose', name: 'Кустовая роза',  price: 220, color: 'oklch(0.66 0.13 32)',  core: 'oklch(0.54 0.14 30)' },
@@ -189,31 +195,58 @@ const FLOWERS = [
   { id: 'chrys',     name: 'Хризантема',     price: 150, color: 'oklch(0.88 0.08 120)', core: 'oklch(0.78 0.1 125)' },
   { id: 'matiola',   name: 'Маттиола',       price: 160, color: 'oklch(0.82 0.05 300)', core: 'oklch(0.72 0.07 300)' },
 ]
-const GREENS = [
+const FALLBACK_GREENS = [
   { id: 'euca',  name: 'Эвкалипт',  desc: 'серебристый', price: 80, color: 'oklch(0.74 0.04 165)' },
   { id: 'ruscus',name: 'Рускус',    desc: 'глянцевый',   price: 60, color: 'oklch(0.55 0.07 150)' },
   { id: 'pista', name: 'Фисташка',  desc: 'фактурная',   price: 90, color: 'oklch(0.6 0.08 135)' },
   { id: 'gyp',   name: 'Гипсофила', desc: 'облачко',     price: 70, color: 'oklch(0.95 0.01 100)' },
 ]
-const WRAPS = [
+const FALLBACK_WRAPS = [
   { id: 'kraft', name: 'Крафт-бумага',     desc: 'тёплая, ремесленная', price: 150, paper: 'oklch(0.74 0.05 70)' },
   { id: 'film',  name: 'Корейская плёнка', desc: 'матовая, нежная',     price: 250, paper: 'oklch(0.9 0.02 60)' },
   { id: 'box',   name: 'Шляпная коробка',  desc: 'держит форму',        price: 600, paper: 'oklch(0.42 0.04 40)' },
   { id: 'none',  name: 'Без упаковки',     desc: 'только лента',        price: 0,   paper: 'oklch(0.88 0.012 80)' },
 ]
-const RIBBONS = [
+const FALLBACK_RIBBONS = [
   { id: 'ivory', name: 'Айвори',       color: 'oklch(0.92 0.02 85)', price: 0 },
   { id: 'dusty', name: 'Пыльная роза', color: 'oklch(0.76 0.06 20)', price: 0 },
   { id: 'moss',  name: 'Мох',          color: 'oklch(0.5 0.06 150)', price: 0 },
   { id: 'bordo', name: 'Бордо',        color: 'oklch(0.42 0.12 25)', price: 50 },
   { id: 'none',  name: 'Без ленты',    color: 'transparent',         price: 0 },
 ]
-const PRESETS = [
+const FALLBACK_PRESETS = [
   { id: 'tender',  name: 'Нежный',     flowers: { peony: 5, ranunculus: 5, eustoma: 3 }, greens: ['euca'],       wrap: 'film',  ribbon: 'ivory' },
   { id: 'bright',  name: 'Яркий',      flowers: { tulip: 9, sprayrose: 6, chrys: 3 },    greens: ['pista'],      wrap: 'kraft', ribbon: 'dusty' },
   { id: 'minimal', name: 'Минимализм', flowers: { hydrangea: 3, eustoma: 4 },            greens: ['euca'],       wrap: 'none',  ribbon: 'moss' },
   { id: 'peony',   name: 'Пионовый',   flowers: { peony: 9, matiola: 5 },                greens: ['euca','gyp'], wrap: 'box',   ribbon: 'bordo' },
 ]
+
+/* каталог API готов только когда есть все визуальные поля + пресеты (v2) */
+const catalogReady = computed(() => {
+  const o = opt.value
+  const ok = (arr, keys) => Array.isArray(arr) && arr.length > 0 && arr.every(x => keys.every(k => x[k] != null))
+  return ok(o.flowers, ['id', 'color', 'core'])
+    && ok(o.greenery, ['id', 'color', 'desc'])
+    && ok(o.packaging, ['id', 'paper'])
+    && ok(o.ribbons, ['id', 'color'])
+    && Array.isArray(o.presets) && o.presets.length > 0
+})
+
+const FLOWERS = computed(() => catalogReady.value
+  ? opt.value.flowers.map(f => ({ id: f.id, name: f.name, price: f.price, color: f.color, core: f.core }))
+  : FALLBACK_FLOWERS)
+const GREENS = computed(() => catalogReady.value
+  ? opt.value.greenery.map(g => ({ id: g.id, name: g.name, desc: g.desc, price: g.price, color: g.color }))
+  : FALLBACK_GREENS)
+const WRAPS = computed(() => catalogReady.value
+  ? opt.value.packaging.map(w => ({ id: w.id, name: w.name, desc: w.desc, price: w.price, paper: w.paper }))
+  : FALLBACK_WRAPS)
+const RIBBONS = computed(() => catalogReady.value
+  ? opt.value.ribbons.map(r => ({ id: r.id, name: r.name, color: r.color, price: r.price }))
+  : FALLBACK_RIBBONS)
+const PRESETS = computed(() => catalogReady.value
+  ? opt.value.presets.map(p => ({ id: p.id, name: p.name, flowers: p.flowers, greens: p.greens, wrap: p.wrap, ribbon: p.ribbon }))
+  : FALLBACK_PRESETS)
 
 const fmt = n => n.toLocaleString('ru-RU')
 const plural = (n, [one, few, many]) => {
@@ -223,7 +256,7 @@ const plural = (n, [one, few, many]) => {
   if (b === 1) return one
   return many
 }
-const flowerById = id => FLOWERS.find(x => x.id === id) || { color: 'transparent' }
+const flowerById = id => FLOWERS.value.find(x => x.id === id) || { color: 'transparent' }
 
 /* ============================ ICONS ============================ */
 const ICONS = {
@@ -410,7 +443,7 @@ function handleAdd() {
 const stems = computed(() => Object.values(st.value.flowers).reduce((a, b) => a + b, 0))
 const heads = computed(() => {
   const arr = []
-  FLOWERS.forEach(f => {
+  FLOWERS.value.forEach(f => {
     const q = st.value.flowers[f.id] || 0
     for (let i = 0; i < q; i++) arr.push(f)
   })
@@ -419,12 +452,12 @@ const heads = computed(() => {
     .sort((a, b) => (a.i % 5) - (b.i % 5) || a.i - b.i)
     .map(o => o.v)
 })
-const greenObjs = computed(() => GREENS.filter(g => st.value.greens.includes(g.id)))
-const wrapObj = computed(() => WRAPS.find(w => w.id === st.value.wrap) || null)
-const ribbonObj = computed(() => RIBBONS.find(r => r.id === st.value.ribbon) || null)
-const composedFlowers = computed(() => FLOWERS.filter(f => st.value.flowers[f.id]))
+const greenObjs = computed(() => GREENS.value.filter(g => st.value.greens.includes(g.id)))
+const wrapObj = computed(() => WRAPS.value.find(w => w.id === st.value.wrap) || null)
+const ribbonObj = computed(() => RIBBONS.value.find(r => r.id === st.value.ribbon) || null)
+const composedFlowers = computed(() => FLOWERS.value.filter(f => st.value.flowers[f.id]))
 
-const priceFlowers = computed(() => FLOWERS.reduce((a, f) => a + (st.value.flowers[f.id] || 0) * f.price, 0))
+const priceFlowers = computed(() => FLOWERS.value.reduce((a, f) => a + (st.value.flowers[f.id] || 0) * f.price, 0))
 const priceGreens = computed(() => greenObjs.value.reduce((a, g) => a + g.price, 0))
 const priceWrap = computed(() => (wrapObj.value ? wrapObj.value.price : 0))
 const priceRibbon = computed(() => (ribbonObj.value ? ribbonObj.value.price : 0))

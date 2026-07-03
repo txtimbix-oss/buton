@@ -75,9 +75,23 @@ function createAdminMessage(overrides: Partial<ChatMessage> = {}): ChatMessage {
 
 afterEach(() => {
   vi.unstubAllGlobals()
+  vi.unstubAllEnvs()
 })
 
 describe('useChat', () => {
+  it('connects customer chat socket to api.butonshop.ru /chat namespace in production env', async () => {
+    vi.stubEnv('VITE_WS_URL', 'https://api.butonshop.ru')
+    const { useChat, io } = await loadChatModule()
+
+    useChat().open()
+    await vi.waitFor(() => expect(io).toHaveBeenCalled())
+
+    expect(io).toHaveBeenCalledWith('https://api.butonshop.ru/chat', expect.objectContaining({
+      withCredentials: true,
+      reconnectionAttempts: 5,
+    }))
+  })
+
   it('open() открывает чат, очищает unread и инициирует подключение', async () => {
     const { useChat, io } = await loadChatModule()
     const chat = useChat()
@@ -178,5 +192,22 @@ describe('useChat', () => {
     })))
     const error = useChat().uploadFiles
     await expect(error([new File(['a'], 'a.txt')])).rejects.toThrow('Ошибка загрузки')
+  })
+
+  it('uploads chat files to the configured production API base', async () => {
+    vi.stubEnv('VITE_API_BASE', 'https://api.butonshop.ru')
+    const { useChat } = await loadChatModule()
+    const attachments = [{ url: '/files/a.png', name: 'a.png', mimeType: 'image/png' }]
+    const fetchMock = vi.fn(async () => ({
+      ok: true,
+      json: async () => ({ files: attachments }),
+    }))
+    vi.stubGlobal('fetch', fetchMock)
+
+    await useChat().uploadFiles([new File(['a'], 'a.txt')])
+
+    expect(fetchMock).toHaveBeenCalledWith('https://api.butonshop.ru/api/chats/upload', expect.objectContaining({
+      method: 'POST',
+    }))
   })
 })

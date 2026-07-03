@@ -1,4 +1,4 @@
-import { BASE } from './client'
+import { apiUrl } from './client'
 import { authApi } from './auth'
 import { profileApi } from './profile'
 import { addressApi } from './addresses'
@@ -17,7 +17,7 @@ export const SHOP_URL = import.meta.env.VITE_SHOP_URL || 'http://localhost:3000'
 export function assetUrl(path: string | null | undefined): string {
   if (!path) return ''
   if (path.startsWith('http') || path.startsWith('blob:')) return path
-  return `${BASE}${path}`
+  return apiUrl(path)
 }
 
 export const api = {

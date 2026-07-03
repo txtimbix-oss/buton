@@ -30,7 +30,7 @@ describe('proxy middleware', () => {
 
   it('proxies api requests and forwards cookies', async () => {
     vi.stubGlobal('useRuntimeConfig', () => ({ apiBase: 'http://api.test' }))
-    vi.stubGlobal('getRequestHeader', vi.fn(() => 'session=abc'))
+    vi.stubGlobal('getRequestHeader', vi.fn((_event, name) => name === 'cookie' ? 'session=abc' : undefined))
 
     const { handler, proxyRequest } = await loadProxyModule()
     const event = { path: '/api/orders' }
@@ -39,6 +39,31 @@ describe('proxy middleware', () => {
 
     expect(proxyRequest).toHaveBeenCalledWith(event, 'http://api.test/api/orders', {
       headers: { cookie: 'session=abc' },
+    })
+  })
+
+  it('proxies customer auth me to production API base when configured', async () => {
+    vi.stubGlobal('useRuntimeConfig', () => ({ apiBase: 'https://api.butonshop.ru' }))
+    vi.stubGlobal('getRequestHeader', vi.fn((_event, name) => {
+      const headers: Record<string, string> = {
+        cookie: 'user_token=abc',
+        origin: 'https://butonshop.ru',
+        referer: 'https://butonshop.ru/account',
+      }
+      return headers[String(name)]
+    }))
+
+    const { handler, proxyRequest } = await loadProxyModule()
+    const event = { path: '/api/user/auth/me' }
+
+    await handler(event)
+
+    expect(proxyRequest).toHaveBeenCalledWith(event, 'https://api.butonshop.ru/api/user/auth/me', {
+      headers: {
+        cookie: 'user_token=abc',
+        origin: 'https://butonshop.ru',
+        referer: 'https://butonshop.ru/account',
+      },
     })
   })
 

@@ -1,57 +1,10 @@
-import { createSSRApp, defineComponent } from 'vue'
+import { computed, createSSRApp, defineComponent, reactive, ref } from 'vue'
 import { renderToString } from '@vue/server-renderer'
 import { describe, expect, it, vi } from 'vitest'
 import ProfileView from '@/views/ProfileView.vue'
 
-vi.mock('@/stores/auth', () => ({
-  useAuthStore: () => ({
-    user: {
-      _id: 'u1',
-      email: 'user@example.com',
-      firstName: 'Анна',
-      lastName: 'Петрова',
-      phone: '+79990000000',
-      notifications: { orderStatus: true, news: false },
-      addresses: [],
-      wishlist: [],
-      bonusBalance: 1200,
-      totalSpent: 10000,
-      referralCode: 'REF',
-      achievements: ['vip'],
-      createdAt: '2026-01-01',
-      avatar: null,
-    },
-    updateUser: vi.fn(),
-  }),
-}))
-
-vi.mock('@/stores/toast', () => ({
-  useToastStore: () => ({
-    show: vi.fn(),
-  }),
-}))
-
-vi.mock('@/composables/useCabinetTier', () => ({
-  useCabinetTier: () => ({
-    tierName: { value: 'Rose' },
-    tierCashback: { value: 12 },
-  }),
-}))
-
-vi.mock('@/composables/useProfileNotifications', () => ({
-  useProfileNotifications: () => ({
-    notif: { orderStatus: true, news: true },
-    toggleNotification: vi.fn(),
-  }),
-}))
-
-vi.mock('@/api', () => ({
-  assetUrl: (value: string) => `https://cdn.test/${value}`,
-  api: {
-    updateProfile: vi.fn(),
-    uploadAvatar: vi.fn(),
-  },
-}))
+// Новый ProfileView: тёмный баннер + прогресс уровня + карточки + медали достижений.
+// Мокаем композаблы, на которых он построен.
 
 vi.mock('@/components/AppLayout.vue', () => ({
   default: defineComponent({
@@ -60,55 +13,59 @@ vi.mock('@/components/AppLayout.vue', () => ({
   }),
 }))
 
-vi.mock('@/components/CabSectionHeader.vue', () => ({
-  default: defineComponent({
-    name: 'CabSectionHeaderStub',
-    template: '<div class="cab-section-header-stub"/>',
+vi.mock('@/composables/useProfileViewModel', () => ({
+  useProfileViewModel: () => ({
+    avatarSrc: computed(() => null),
+    avatarUploading: ref(false),
+    earnedAchievements: computed(() => ['first_order']),
+    error: ref(''),
+    form: reactive({ firstName: 'Анна', lastName: 'Петрова', phone: '+79990000000', email: 'user@example.com' }),
+    fullName: computed(() => 'Анна Петрова'),
+    handleReferralCopied: vi.fn(),
+    initials: computed(() => 'АП'),
+    notif: reactive({ orderStatus: true, news: false }),
+    onAvatarSelected: vi.fn(),
+    referralCode: computed(() => 'REF123'),
+    reset: vi.fn(),
+    save: vi.fn(),
+    saving: ref(false),
+    success: ref(''),
+    toggleNotification: vi.fn(),
   }),
 }))
 
-vi.mock('@/components/CabReferralCard.vue', () => ({
-  default: defineComponent({
-    name: 'CabReferralCardStub',
-    template: '<div class="cab-referral-card-stub"></div>',
+vi.mock('@/composables/useCabinetTier', () => ({
+  useCabinetTier: () => ({
+    tierName: computed(() => 'Новичок'),
+    tierCashback: computed(() => 3),
+    isMaxLevel: computed(() => false),
+    nextLevel: computed(() => ({ key: 'regular', name: 'Постоянный', min: 1000, cashback: 5 })),
+    nextTierName: computed(() => 'Постоянный'),
+    nextThreshold: computed(() => 1000),
+    remainingToNext: computed(() => 1000),
+    progressPct: computed(() => 0),
   }),
 }))
 
-vi.mock('@/components/profile/ProfileAvatarCard.vue', () => ({
-  default: defineComponent({
-    name: 'ProfileAvatarCardStub',
-    template: '<div class="profile-avatar-card-stub"></div>',
+vi.mock('@/stores/auth', () => ({
+  useAuthStore: () => ({
+    user: { bonusBalance: 300, totalSpent: 0, createdAt: '2026-01-01' },
   }),
 }))
 
-vi.mock('@/components/profile/ProfileNotificationsSection.vue', () => ({
-  default: defineComponent({
-    name: 'ProfileNotificationsSectionStub',
-    template: '<div class="profile-notifications-section-stub"></div>',
-  }),
-}))
-
-vi.mock('@/components/profile/ProfilePersonalForm.vue', () => ({
-  default: defineComponent({
-    name: 'ProfilePersonalFormStub',
-    template: '<div class="profile-personal-form-stub"></div>',
-  }),
-}))
-
-vi.mock('@/components/profile/ProfileAchievementsSection.vue', () => ({
-  default: defineComponent({
-    name: 'ProfileAchievementsSectionStub',
-    template: '<div class="profile-achievements-section-stub"></div>',
-  }),
+vi.mock('@/api/achievements', () => ({
+  achievementsApi: {
+    get: vi.fn().mockResolvedValue({ summary: { earned: 0, total: 4 }, earnedKeys: [], items: [] }),
+  },
 }))
 
 describe('ProfileView', () => {
-  it('рендерит shell и основные секции профиля', async () => {
+  it('рендерит профиль (баннер, личные данные, достижения)', async () => {
     const app = createSSRApp(ProfileView)
     const html = await renderToString(app)
 
-    expect(html).toContain('Профиль')
-    expect(html).toContain('Управляйте личными данными и уведомлениями')
-    expect(html).toContain('profile-2col')
+    expect(html).toContain('Анна Петрова')
+    expect(html).toContain('Личные данные')
+    expect(html).toContain('Достижения')
   })
 })

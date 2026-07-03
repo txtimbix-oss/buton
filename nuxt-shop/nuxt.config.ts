@@ -36,6 +36,8 @@ export default defineNuxtConfig({
       siteUrl:    process.env.NUXT_PUBLIC_SITE_URL    || 'https://butonshop.ru',
       // URL личного кабинета покупателей (prod: user.butonshop.ru)
       cabinetUrl: process.env.NUXT_PUBLIC_CABINET_URL || 'https://user.butonshop.ru/',
+      // Absolute public API base for helpers that explicitly need direct browser API URLs
+      apiBase: process.env.NUXT_PUBLIC_API_BASE || '',
       // WebSocket: прямой URL к API для socket.io (браузер не использует Nitro-прокси для WS)
       wsBase: process.env.NUXT_PUBLIC_WS_BASE || '',
     },

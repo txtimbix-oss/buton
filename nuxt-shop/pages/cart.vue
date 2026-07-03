@@ -16,7 +16,7 @@
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 6h11v9H3zM14 9h4l3 3v3h-7z"/><circle cx="7" cy="18" r="1.6"/><circle cx="17" cy="18" r="1.6"/></svg>
         </span>
         <div class="fb-t">
-          <span v-if="freeDelivery"><b>Доставка бесплатно</b> — сумма заказа превысила 4 000 ₽ 🎉</span>
+          <span v-if="freeDelivery"><b>Доставка бесплатно</b> — сумма заказа превысила {{ fmt(freeThreshold) }} ₽ 🎉</span>
           <span v-else>До <b>бесплатной доставки</b> осталось <b>{{ fmt(toFree) }} ₽</b></span>
           <div class="track"><div class="fill" :style="{ width: freePct + '%' }"></div></div>
         </div>
@@ -74,7 +74,7 @@
                     Курьером
                   </div>
                   <div class="md">По Санкт-Петербургу, в выбранный слот</div>
-                  <div class="mp">{{ freeDelivery ? 'Бесплатно от 4 000 ₽' : 'от 400 ₽' }}</div>
+                  <div class="mp">{{ freeDelivery ? `Бесплатно от ${fmt(freeThreshold)} ₽` : `от ${fmt(ZONES[0]?.price || 390)} ₽` }}</div>
                 </div>
                 <div class="method" :class="{ on: method === 'pickup' }" @click="method = 'pickup'">
                   <div class="mt">
@@ -246,7 +246,7 @@
               </span>
               <div>
                 <div class="bt">Списать баллы</div>
-                <div class="bd">Доступно <b>{{ fmt(BONUS_AVAIL) }}</b> · спишем <b>{{ fmt(maxBonus) }}</b> (до 30% заказа)</div>
+                <div class="bd">Доступно <b>{{ fmt(bonusAvail) }}</b> · спишем <b>{{ fmt(maxBonus) }}</b> (до 30% заказа)</div>
               </div>
             </div>
 
@@ -308,24 +308,64 @@ const plural = (n, [one, few, many]) => {
   return many
 }
 
-const ITEMS0 = [
-  { id: 1, n: 'Белые ночи', c: 'Размер M · открытка', addon: 'Мишка Тедди', price: 5200, old: 6100, qty: 1, m: 'oklch(0.85 0.06 20)' },
-  { id: 2, n: 'Невский букет', c: 'Размер S · кустовые розы', addon: null, price: 4200, old: 0, qty: 1, m: 'oklch(0.72 0.06 350)' },
+/* ---- корзина из реального стора (useCart) ---- */
+const cart = useCart()
+const BLOOM_COLOR = {
+  rose: 'oklch(0.84 0.06 20)', pink: 'oklch(0.84 0.06 20)', red: 'oklch(0.6 0.15 24)',
+  white: 'oklch(0.92 0.012 90)', cream: 'oklch(0.9 0.03 80)', peach: 'oklch(0.86 0.07 50)',
+  lav: 'oklch(0.78 0.06 320)', lilac: 'oklch(0.78 0.06 320)', blue: 'oklch(0.74 0.06 250)',
+  yellow: 'oklch(0.86 0.09 90)', green: 'oklch(0.72 0.08 140)', mix: 'oklch(0.8 0.07 140)',
+}
+const items = computed(() => cart.items.value.map(l => ({
+  id: l.lineId,
+  n: l.name,
+  c: l.meta || l.sizeLabel || '',
+  addon: (l.addons && l.addons.length) ? l.addons.join(', ') : null,
+  price: l.price,
+  old: 0,
+  qty: l.qty,
+  m: BLOOM_COLOR[l.bloom] || 'oklch(0.85 0.06 20)',
+})))
+
+/* ---- зоны доставки с бэка (фолбэк — реальные значения) ---- */
+const ZONES_FALLBACK = [
+  { id: 'center', n: 'Центр', price: 390 },
+  { id: 'nord', n: 'Север и Юг', price: 390 },
+  { id: 'far', n: 'Отдалённые', price: 490 },
+  { id: 'prig', n: 'Пригород', price: 690 },
 ]
-const ZONES = [
-  { id: 'center', n: 'Центр', price: 400 },
-  { id: 'vasil', n: 'Васильевский о.', price: 500 },
-  { id: 'spalny', n: 'Спальные районы', price: 600 },
-  { id: 'kad', n: 'За КАД', price: 900 },
-]
-const SLOTS = [
+const { data: zonesRaw } = await useFetch('/api/delivery-zones', { default: () => [] })
+const ZONES = computed(() => {
+  const list = Array.isArray(zonesRaw.value) ? zonesRaw.value.filter(z => z && z.isActive !== false) : []
+  if (!list.length) return ZONES_FALLBACK
+  return [...list].sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0)).map(z => ({ id: z._id, n: z.name, price: z.cost || 0 }))
+})
+
+/* слоты доставки с бэка по выбранной дате/зоне (фолбэк — статичные) */
+const SLOTS_FALLBACK = [
   { id: 's1', t: '12:00–14:00', off: true },
   { id: 's2', t: '14:00–16:00', off: false, f: 'свободно' },
   { id: 's3', t: '16:00–18:00', off: false, f: 'свободно' },
   { id: 's4', t: '18:00–20:00', off: false, f: 'мало слотов' },
-  { id: 's5', t: '20:00–22:00', off: false, f: '+200 ₽' },
+  { id: 's5', t: '20:00–22:00', off: false, f: 'свободно' },
 ]
-const BONUS_AVAIL = 1240
+const slotsRaw = ref(null)
+const SLOTS = computed(() => {
+  const list = slotsRaw.value?.slots
+  if (!Array.isArray(list) || !list.length) return SLOTS_FALLBACK
+  return list.map((s, i) => ({
+    id: 's' + (i + 1),
+    t: String(s.time || '').replace(/\s+/g, ''),
+    off: !!s.full,
+    f: s.full ? 'нет мест' : (typeof s.remaining === 'number' && s.remaining <= 2 ? `осталось ${s.remaining}` : 'свободно'),
+  }))
+})
+
+/* ---- бонусы юзера + порог бесплатной доставки из настроек ---- */
+const { user: shopUser } = useShopUser()
+const bonusAvail = computed(() => Number(shopUser.value?.bonusBalance) || 0)
+const settings = useSettings()
+const freeThreshold = computed(() => Number(settings.value?.deliveryFreeThreshold) || 5000)
 
 function dateChips() {
   const wd = ['вс', 'пн', 'вт', 'ср', 'чт', 'пт', 'сб']
@@ -340,9 +380,8 @@ function dateChips() {
 }
 
 // state
-const items = ref(ITEMS0.map(x => ({ ...x })))
 const method = ref('courier')
-const zone = ref('center')
+const zone = ref(null)
 const self = ref(false)
 const date = ref(0)
 const slot = ref('s3')
@@ -353,30 +392,49 @@ const promo = ref('')
 const promoApplied = ref(false)
 const useBonus = ref(false)
 
+// дефолтная зона = первая доступная (после загрузки с бэка)
+watch(ZONES, (list) => { if (list.length && !list.some(z => z.id === zone.value)) zone.value = list[0].id }, { immediate: true })
+
 // dates — new Date() only on the client
 const dates = ref([])
 onMounted(() => { dates.value = dateChips() })
 
-const setQty = (id, d) => {
-  items.value = items.value.map(x => x.id === id ? { ...x, qty: Math.max(1, x.qty + d) } : x)
+/* слоты с бэка: перезапрос при смене даты/зоны (клиент-онли, date обязателен) */
+async function loadSlots() {
+  if (!import.meta.client) return
+  const d = new Date(); d.setDate(d.getDate() + date.value)
+  try {
+    slotsRaw.value = await $fetch('/api/delivery-slots/availability', {
+      query: { date: d.toISOString().slice(0, 10), zoneId: zone.value || undefined },
+    })
+  } catch { slotsRaw.value = null }
 }
-const remove = id => { items.value = items.value.filter(x => x.id !== id) }
+onMounted(loadSlots)
+watch([date, zone], loadSlots)
+// держим выбранный слот валидным (не full)
+watch(SLOTS, (list) => {
+  const cur = list.find(s => s.id === slot.value)
+  if (!cur || cur.off) { const first = list.find(s => !s.off); if (first) slot.value = first.id }
+}, { immediate: true })
+
+const setQty = (id, d) => { const l = cart.items.value.find(x => x.lineId === id); if (l) cart.setLineQty(id, l.qty + d) }
+const remove = id => cart.removeLine(id)
 
 const subtotal = computed(() => items.value.reduce((a, x) => a + x.price * x.qty, 0))
 const totalQty = computed(() => items.value.reduce((a, x) => a + x.qty, 0))
-const zoneObj = computed(() => ZONES.find(z => z.id === zone.value))
-const slotExtra = computed(() => slot.value === 's5' ? 200 : 0)
+const zoneObj = computed(() => ZONES.value.find(z => z.id === zone.value) || ZONES.value[0] || { n: '', price: 0 })
+const slotExtra = computed(() => 0) // наценки за слот в API нет
 const baseDelivery = computed(() => method.value === 'pickup' ? 0 : (zoneObj.value.price + slotExtra.value))
-const freeDelivery = computed(() => subtotal.value >= 4000)
+const freeDelivery = computed(() => subtotal.value >= freeThreshold.value)
 const delivery = computed(() => freeDelivery.value ? 0 : baseDelivery.value)
 const promoDisc = computed(() => promoApplied.value ? Math.round(subtotal.value * 0.15) : 0)
 const afterPromo = computed(() => subtotal.value - promoDisc.value)
-const maxBonus = computed(() => Math.min(BONUS_AVAIL, Math.round(afterPromo.value * 0.3)))
+const maxBonus = computed(() => Math.min(bonusAvail.value, Math.round(afterPromo.value * 0.3)))
 const bonusUsed = computed(() => useBonus.value ? maxBonus.value : 0)
 const total = computed(() => Math.max(0, afterPromo.value - bonusUsed.value + delivery.value))
 const earn = computed(() => Math.round(total.value * 0.05))
-const toFree = computed(() => Math.max(0, 4000 - subtotal.value))
-const freePct = computed(() => Math.min(100, subtotal.value / 4000 * 100))
+const toFree = computed(() => Math.max(0, freeThreshold.value - subtotal.value))
+const freePct = computed(() => Math.min(100, subtotal.value / freeThreshold.value * 100))
 
 const applyPromo = () => {
   promoApplied.value = promo.value.trim().toUpperCase() === 'SPRING15'

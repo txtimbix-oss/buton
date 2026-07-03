@@ -48,6 +48,7 @@ beforeEach(() => {
 
 afterEach(() => {
   vi.clearAllMocks()
+  vi.unstubAllEnvs()
 })
 
 afterAll(() => {
@@ -59,6 +60,17 @@ function parsePayload<T>(payload: unknown): T {
 }
 
 describe('api client', () => {
+  it('uses configured API base for private and public API clients', async () => {
+    vi.stubEnv('VITE_API_BASE', 'https://api.butonshop.ru')
+    vi.resetModules()
+
+    const { BASE, apiUrl } = await import('../src/api/client')
+
+    expect(BASE).toBe('https://api.butonshop.ru')
+    expect(apiUrl('/api/inquiries')).toBe('https://api.butonshop.ru/api/inquiries')
+    expect(apiUrl('api/inquiries')).toBe('https://api.butonshop.ru/api/inquiries')
+  })
+
   it('builds asset URLs safely', () => {
     expect(assetUrl('https://cdn.example.com/p.png')).toBe('https://cdn.example.com/p.png')
     expect(assetUrl('blob:local-123')).toBe('blob:local-123')

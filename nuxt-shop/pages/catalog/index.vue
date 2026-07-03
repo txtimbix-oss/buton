@@ -13,7 +13,7 @@
         <h1 class="serif">Каталог букетов</h1>
         <p class="sub">
           Свежие букеты с доставкой по Санкт-Петербургу ·
-          <b>{{ filtered.length }} {{ plural(filtered.length, ['букет', 'букета', 'букетов']) }}</b>
+          <b>{{ total }} {{ plural(total, ['букет', 'букета', 'букетов']) }}</b>
           по вашему запросу
         </p>
       </div>
@@ -58,7 +58,7 @@
               <span v-html="I.filter" />Фильтры
             </button>
             <span class="rc">
-              <b>{{ filtered.length }}</b> {{ plural(filtered.length, ['букет', 'букета', 'букетов']) }}
+              <b>{{ total }}</b> {{ plural(total, ['букет', 'букета', 'букетов']) }}
             </span>
             <div class="sortwrap">
               <span class="sl">Сортировка:</span>
@@ -127,11 +127,12 @@
           <div v-if="pages > 1" class="pager">
             <button class="pg" :disabled="cur === 1" @click="page = cur - 1">←</button>
             <button
-              v-for="i in pages"
-              :key="i"
+              v-for="(i, idx) in pageList"
+              :key="idx"
               class="pg"
-              :class="{ on: cur === i }"
-              @click="page = i"
+              :class="{ on: cur === i, dots: i === '…' }"
+              :disabled="i === '…'"
+              @click="i !== '…' && (page = i)"
             >
               {{ i }}
             </button>
@@ -166,7 +167,7 @@
       <CatalogSidebar />
       <div class="dapply">
         <button class="btn-primary" style="width: 100%" @click="drawer = false">
-          Показать {{ filtered.length }} {{ plural(filtered.length, ['букет', 'букета', 'букетов']) }}
+          Показать {{ total }} {{ plural(total, ['букет', 'букета', 'букетов']) }}
         </button>
       </div>
     </div>
@@ -206,12 +207,6 @@ const I = {
 /* ---- options ---- */
 const COLLECTIONS = [['all', 'Все букеты'], ['mono', 'Монобукеты'], ['box', 'В коробке'], ['author', 'Авторские'], ['wed', 'Свадебные']]
 const QUICK = [['hit', 'Хиты'], ['new', 'Новинки'], ['sale', 'Со скидкой'], ['today', 'Доступно сегодня'], ['cheap', 'До 3 000 ₽']]
-/* подписи к реальным значениям с бэка: product.bloom (палитра) и product.tags (ваши метки).
-   Опции фильтров строятся динамически из самих товаров — что в данных, то и в сайдбаре. */
-const BLOOM_LABEL = { rose: 'Розовые', peach: 'Персиковые', green: 'Зелёные', lav: 'Лавандовые', mix: 'Сборные', white: 'Белые', cream: 'Кремовые', red: 'Красные', pastel: 'Пастельные' }
-const MARK_LABEL = { 'премиум': 'Премиум', 'акция': 'Акция', 'свежий': 'Свежие', 'выбор дня': 'Выбор дня' }
-const BLOOM_SET = new Set(Object.keys(BLOOM_LABEL))
-
 const CICON = {
   all: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>',
   mono: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="7" r="3.2"/><path d="M12 10v10M9 14c-2 0-3-1-3-3M15 14c2 0 3-1 3-3"/></svg>',
@@ -220,173 +215,146 @@ const CICON = {
   wed: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="8.5" cy="14" r="5"/><circle cx="15.5" cy="14" r="5"/></svg>',
 }
 
-/* ---- product data ---- */
+/* ---- card mapping ---- */
 const grads = { pink: 'oklch(0.84 0.06 20)', red: 'oklch(0.6 0.15 24)', white: 'oklch(0.92 0.012 90)', blue: 'oklch(0.74 0.06 250)', lilac: 'oklch(0.78 0.06 320)', yellow: 'oklch(0.86 0.09 90)', green: 'oklch(0.72 0.08 140)' }
 const TAGLAB = { hit: ['hit', 'Хит'], new: ['new', 'Новинка'], sale: ['sale', 'Скидка'] }
-const PER = 9
-
-/* ---- real products from API ---- */
-const { data: prodRaw } = await useFetch('/api/products', { query: { limit: 60 }, default: () => ({ items: [] }) })
-const apiItems = computed(() => (prodRaw.value && prodRaw.value.items) ? prodRaw.value.items : [])
-const TAGc = { 'Хит': 'hit', 'Новинка': 'new', 'Скидка': 'sale' }
-const toCard = (p, i) => ({
-  id: p._id || i, n: p.name, c: p.meta || '', p: p.price || 0,
-  o: p.oldPrice || (p.tag ? Math.round((p.price || 0) * 1.18 / 50) * 50 : 0),
-  r: p.rating || 4.9, tag: p.tag ? [TAGc[p.tag] || 'hit', p.tag] : null,
-  img: (p.images && p.images[0]) || '', m: 'oklch(0.85 0.06 20)', slug: p.slug,
-  color: p.bloom, bloom: p.bloom,
-  tags: Array.isArray(p.tags) ? p.tags : [],
-})
-/* только реальные товары с бэка (мок удалён) */
-const ALL = computed(() => apiItems.value.map(toCard))
-
-/* опции фильтров строим из реальных данных товаров (с бэка), а не из хардкода */
-const cap = s => String(s).charAt(0).toUpperCase() + String(s).slice(1)
-const optsFromCounts = (counts, labels) =>
-  Object.entries(counts).sort((a, b) => b[1] - a[1]).map(([id]) => [id, labels[id] || cap(id)])
-const bloomOpts = computed(() => {
-  const m = {}
-  ALL.value.forEach(p => { if (p.bloom) m[p.bloom] = (m[p.bloom] || 0) + 1 })
-  return optsFromCounts(m, BLOOM_LABEL)
-})
-const markOpts = computed(() => {
-  const m = {}
-  ALL.value.forEach(p => (p.tags || []).forEach(t => { if (!BLOOM_SET.has(t)) m[t] = (m[t] || 0) + 1 }))
-  return optsFromCounts(m, MARK_LABEL)
-})
+const tagLab = p => Array.isArray(p.tag) ? p.tag : (TAGLAB[p.tag] || ['hit', p.tag])
+const LIMIT = 24
 
 /* ---- state ---- */
-const DEFAULT = { coll: 'all', quick: null, bloom: [], marks: [], maxPrice: 16000, saleOnly: false, todayOnly: false }
-const f = reactive({ ...DEFAULT, bloom: [], marks: [] })
-
-/* применить фильтры из URL (?coll=, ?type=, ?quick=, ?sale=1, ?today=1) */
 const route = useRoute()
+const DEFAULT = { coll: 'all', quick: null, bloom: [], sizes: [], tag: null, collection: null, maxPrice: null, saleOnly: false }
+const f = reactive({ ...DEFAULT, bloom: [], sizes: [] })
 {
   const Q = route.query
   if (Q.coll) f.coll = String(Q.coll)
   if (Q.quick) f.quick = String(Q.quick)
   if (Q.sale === '1') f.saleOnly = true
-  if (Q.today === '1') f.todayOnly = true
 }
-
 const sort = ref('pop')
 const page = ref(1)
 
-/* клики по категориям в шапке меняют ?coll=/?quick=/?type=/?sale — реагируем вживую,
-   даже если уже находимся на странице каталога (setup-блок выше отрабатывает только на первой загрузке) */
+/* клики по категориям/быстрым фильтрам в шапке (?coll=/?quick=/?sale=) */
 watch(() => route.query, (Q) => {
   f.coll = Q.coll ? String(Q.coll) : 'all'
   f.quick = Q.quick ? String(Q.quick) : null
   f.saleOnly = Q.sale === '1'
-  f.todayOnly = Q.today === '1'
   page.value = 1
 })
 
 const likes = reactive({})
 const drawer = ref(false)
+const toggleLike = id => { likes[id] = !likes[id] }
+const quickCard = ref(null)
+const onCardClick = (e, p) => {
+  if (e.target.closest('.like')) { e.preventDefault(); return }
+  if (e.metaKey || e.ctrlKey || e.shiftKey || e.button === 1) return
+  e.preventDefault()
+  quickCard.value = p
+}
 
 const upd = patch => { Object.assign(f, patch); page.value = 1 }
 const toggleArr = (key, val) => {
   const arr = f[key]
   const i = arr.indexOf(val)
-  if (i === -1) arr.push(val)
-  else arr.splice(i, 1)
+  if (i === -1) arr.push(val); else arr.splice(i, 1)
   page.value = 1
 }
-const reset = () => {
-  Object.assign(f, { ...DEFAULT, occ: [], season: [], type: [], size: [] })
-  page.value = 1
-}
-const toggleLike = id => { likes[id] = !likes[id] }
-const quickCard = ref(null)
-const onCardClick = (e, p) => {
-  // лайк обрабатывает свой клик сам
-  if (e.target.closest('.like')) { e.preventDefault(); return }
-  // ctrl/cmd/shift/средняя кнопка — отдать браузеру (открыть полную страницу в новой вкладке)
-  if (e.metaKey || e.ctrlKey || e.shiftKey || e.button === 1) return
-  // обычный клик — быстрый просмотр вместо перехода
-  e.preventDefault()
-  quickCard.value = p
-}
+const reset = () => { Object.assign(f, { ...DEFAULT, bloom: [], sizes: [] }); page.value = 1 }
 
-/* ---- tag normalization (PRODUCTS: string, API card: [class, label]) ---- */
-const tagOf = p => Array.isArray(p.tag) ? p.tag[0] : (p.tag || null)
-const tagLab = p => Array.isArray(p.tag) ? p.tag : (TAGLAB[p.tag] || ['hit', p.tag])
-
-/* приближение коллекции по типу цветка (bloom) — у товаров из API нет поля collection */
-const COLL_BLOOM = { mono: ['rose', 'red'], box: ['peach', 'lav'], author: ['mix', 'green'], wed: ['cream'] }
-
-/* ---- filtering / sorting ---- */
-const filtered = computed(() => {
-  let list = ALL.value.filter(p => {
-    const t = tagOf(p)
-    // collection: реальное поле если есть, иначе приближаем по bloom (p.type)
-    if (f.coll !== 'all') {
-      if (p.collection !== undefined) { if (p.collection !== f.coll) return false }
-      else if (COLL_BLOOM[f.coll] && p.bloom && !COLL_BLOOM[f.coll].includes(p.bloom)) return false
-    }
-    if (f.quick === 'hit' && t !== 'hit') return false
-    if (f.quick === 'new' && t !== 'new') return false
-    if (f.quick === 'sale' && t !== 'sale' && !(p.o > 0)) return false
-    if (f.quick === 'today' && p.today !== undefined && !p.today) return false
-    if (f.quick === 'cheap' && p.p > 3000) return false
-    // палитра (bloom) и метки (tags) — реальные поля с бэка
-    if (f.bloom.length && p.bloom !== undefined && !f.bloom.includes(p.bloom)) return false
-    if (f.marks.length && !f.marks.some(mk => (p.tags || []).includes(mk))) return false
-    if (p.p > f.maxPrice) return false
-    if (f.saleOnly && p.o !== undefined && !(p.o > 0)) return false
-    if (f.todayOnly && p.today !== undefined && !p.today) return false
-    return true
-  })
-  if (sort.value === 'cheap') list = [...list].sort((a, b) => a.p - b.p)
-  else if (sort.value === 'exp') list = [...list].sort((a, b) => b.p - a.p)
-  else if (sort.value === 'rate') list = [...list].sort((a, b) => b.r - a.r)
-  return list
+/* ---- server-side query → /api/products/catalog ---- */
+const SORT_MAP = { pop: 'popular', cheap: 'price_asc', exp: 'price_desc', rate: 'popular' }
+/* id чипа-категории → реальный slug категории на бэке (?category=) */
+const COLL_SLUG = { mono: 'mono', box: 'box', author: 'avtorskie', wed: 'wedding' }
+const query = computed(() => {
+  const q = { page: page.value, limit: LIMIT, sort: SORT_MAP[sort.value] || 'popular' }
+  if (f.coll !== 'all' && COLL_SLUG[f.coll]) q.category = COLL_SLUG[f.coll]
+  if (f.collection) q.collection = f.collection
+  if (f.bloom.length) q.blooms = f.bloom.join(',')
+  if (f.sizes.length) q.sizes = f.sizes.join(',')
+  let tag = f.tag
+  if (f.quick === 'hit') tag = 'Хит'
+  else if (f.quick === 'new') tag = 'Новинка'
+  if (tag) q.tag = tag
+  if (f.saleOnly || f.quick === 'sale') q.sale = 'true'
+  if (f.quick === 'cheap') q.priceMax = 3000
+  else if (f.maxPrice != null) q.priceMax = f.maxPrice
+  return q
+})
+const { data: catalog } = await useFetch('/api/products/catalog', {
+  query,
+  default: () => ({ items: [], total: 0, page: 1, limit: LIMIT, pages: 1, facets: {} }),
 })
 
-const pages = computed(() => Math.max(1, Math.ceil(filtered.value.length / PER)))
+/* ---- facets = источник правды для UI фильтров (не из items текущей страницы) ---- */
+const facets = computed(() => catalog.value?.facets || {})
+const total = computed(() => catalog.value?.total || 0)
+const pages = computed(() => Math.max(1, catalog.value?.pages || 1))
 const cur = computed(() => Math.min(page.value, pages.value))
-const shown = computed(() => filtered.value.slice((cur.value - 1) * PER, cur.value * PER))
-const cntFor = pred => ALL.value.filter(pred).length
+/* windowed-пейджер: 1 2 … cur-1 cur cur+1 … n-1 n */
+const pageList = computed(() => {
+  const n = pages.value, c = cur.value
+  if (n <= 7) return Array.from({ length: n }, (_, i) => i + 1)
+  const set = new Set([1, 2, n - 1, n, c - 1, c, c + 1])
+  const arr = [...set].filter(x => x >= 1 && x <= n).sort((a, b) => a - b)
+  const res = []
+  let prev = 0
+  for (const x of arr) { if (x - prev > 1) res.push('…'); res.push(x); prev = x }
+  return res
+})
+const priceRange = computed(() => facets.value.priceRange || { min: 0, max: 16000 })
+const bloomOpts = computed(() => (facets.value.blooms || []).map(b => [b.value, b.label, b.count]))
+/* технические/тестовые теги прячем из «Подборок» */
+const JUNK_TAGS = new Set(['qa', 'QA', 'recommendations', 'test'])
+const tagOpts = computed(() => (facets.value.tags || []).filter(t => !JUNK_TAGS.has(t.value)).map(t => [t.value, t.label, t.count]))
+const sizeOpts = computed(() => (facets.value.sizes || []).map(s => [s.value, s.label, s.count]))
+/* коллекции: реальные (без seed-*), топ по количеству */
+const collectionOpts = computed(() => (facets.value.collections || []).filter(c => !/^seed-/.test(c.slug) && c.count > 0).sort((a, b) => b.count - a.count).slice(0, 12).map(c => [c.slug, c.name, c.count]))
 
-/* ---- sidebar as inline functional render (shared desktop + drawer) ---- */
+/* ---- карточки текущей страницы (server-side, без клиентской фильтрации) ---- */
+const TAGc = { 'Хит': 'hit', 'Новинка': 'new', 'Скидка': 'sale', 'премиум': 'hit' }
+const toCard = (p, i) => ({
+  id: p._id || i, n: p.name, c: p.meta || '', p: p.price || 0,
+  o: p.oldPrice || 0,
+  r: p.rating || 4.9, tag: p.tag ? [TAGc[p.tag] || 'hit', p.tag] : null,
+  img: (p.images && p.images[0]) || '', m: 'oklch(0.85 0.06 20)', slug: p.slug,
+  color: p.bloom, bloom: p.bloom,
+})
+const shown = computed(() => (catalog.value?.items || []).map(toCard))
+
+/* ---- sidebar (facet-driven, общий desktop + drawer) ---- */
 const CatalogSidebar = () => {
-  const group = (title, opts, key, predOf) =>
+  const optGroup = (title, opts, isOn, onClick) =>
     h('div', { class: 'fgroup' }, [
       h('h4', title),
-      h('div', { class: ['fopts', { fsizes: key === 'size' }] },
-        opts.map(([id, n]) =>
-          h('div', {
-            key: id,
-            class: ['fopt', { 'fopt-size': key === 'size', on: f[key].includes(id) }],
-            onClick: () => toggleArr(key, id),
-          }, key === 'size'
-            ? [n]
-            : [
-                h('span', { class: 'cbx', innerHTML: I.check }),
-                n,
-                h('span', { class: 'cnt' }, cntFor(predOf(id))),
-              ]),
+      h('div', { class: 'fopts' },
+        opts.map(([id, label, count]) =>
+          h('div', { key: id, class: ['fopt', { on: isOn(id) }], onClick: () => onClick(id) }, [
+            h('span', { class: 'cbx', innerHTML: I.check }),
+            label,
+            h('span', { class: 'cnt' }, count),
+          ]),
         ),
       ),
     ])
-
+  const pr = priceRange.value
+  const priceVal = f.maxPrice ?? pr.max
   return h('div', { class: 'sidebar-inner' }, [
-    markOpts.value.length ? group('Подборки', markOpts.value, 'marks', id => p => (p.tags || []).includes(id)) : null,
-    bloomOpts.value.length ? group('Палитра', bloomOpts.value, 'bloom', id => p => p.bloom === id) : null,
-    // Цена
+    tagOpts.value.length ? optGroup('Подборки', tagOpts.value, id => f.tag === id, id => upd({ tag: f.tag === id ? null : id })) : null,
+    bloomOpts.value.length ? optGroup('Палитра', bloomOpts.value, id => f.bloom.includes(id), id => toggleArr('bloom', id)) : null,
+    sizeOpts.value.length ? optGroup('Размер', sizeOpts.value, id => f.sizes.includes(id), id => toggleArr('sizes', id)) : null,
+    collectionOpts.value.length ? optGroup('Коллекции', collectionOpts.value, id => f.collection === id, id => upd({ collection: f.collection === id ? null : id })) : null,
     h('div', { class: 'fgroup' }, [
       h('h4', 'Цена, до'),
       h('div', { class: 'range' }, [
-        h('div', { class: 'vals' }, [h('span', '0 ₽'), h('span', `${fmt(f.maxPrice)} ₽`)]),
+        h('div', { class: 'vals' }, [h('span', `${fmt(pr.min)} ₽`), h('span', `${fmt(priceVal)} ₽`)]),
         h('input', {
-          type: 'range', min: '2000', max: '16000', step: '100',
-          value: f.maxPrice,
+          type: 'range', min: String(pr.min), max: String(pr.max), step: '100',
+          value: priceVal,
           onInput: e => upd({ maxPrice: +e.target.value }),
         }),
       ]),
     ]),
-    // Чекбокс скидка
     h('div', { class: 'fgroup', style: { borderBottom: 'none' } }, [
       h('div', { class: 'fopts' }, [
         h('div', { class: ['fopt', { on: f.saleOnly }], onClick: () => upd({ saleOnly: !f.saleOnly }) }, [
@@ -536,6 +504,8 @@ const CatalogSidebar = () => {
 .pg:hover { border-color: var(--green-soft); }
 .pg.on { background: var(--green); color: #fff; border-color: var(--green); }
 .pg:disabled { opacity: .4; cursor: not-allowed; }
+.pg.dots { border: none; background: none; cursor: default; opacity: 1; min-width: 22px; padding: 0; color: var(--ink-faint); }
+.pg.dots:hover { border: none; }
 
 /* ===== empty ===== */
 .empty { text-align: center; padding: 70px 20px; border: 1px dashed var(--line-strong); border-radius: var(--r); }

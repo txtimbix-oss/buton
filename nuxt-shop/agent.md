@@ -11,6 +11,8 @@
 - `nuxt-shop` — публичная витрина магазина
 - здесь важны: главная, каталог, карточка товара, коллекции, корзина, подписка, SEO и доверие
 - данные и большая часть контента приходят из `api`
+- Production domain rule: no `spbapp` domains in PM2/env/runtime config. Use `butonshop.ru`, `user.butonshop.ru`, and `api.butonshop.ru`.
+- Customer auth reads use relative `/api/user/auth/me`; this must go through Nitro proxy to `NUXT_API_BASE`.
 
 ## Текущий приоритет
 

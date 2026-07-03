@@ -1,5 +1,6 @@
 import { storeToRefs } from 'pinia'
 import type { Socket } from 'socket.io-client'
+import { apiUrl } from '@/api/client'
 import { normalizeCabinetApiError, toCabinetApiError } from '@/api/errors'
 import { normalizeIncomingMessage } from '@/features/chat/messages'
 import type { ChatAttachment, ChatMessage } from '@/features/chat/messages'
@@ -178,7 +179,7 @@ export function useChat() {
     try {
       const fd = new FormData()
       for (const f of files) fd.append('files', f)
-      const res = await fetch('/api/chats/upload', {
+      const res = await fetch(apiUrl('/api/chats/upload'), {
         method: 'POST',
         headers: { 'x-chat-session-id': getSessionId() },
         body: fd,

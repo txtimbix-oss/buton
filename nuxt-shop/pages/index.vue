@@ -157,6 +157,7 @@
           <NuxtLink class="btn-primary" to="/subscription">Оформить подписку <span v-html="I.arrow"></span></NuxtLink>
         </div>
         <div class="sc-media">
+          <span class="sc-badge">−15%</span>
           <img v-if="subImg" :src="subImg" alt="" class="media-img" />
           <div v-else class="ph" :style="{ position: 'absolute', inset: 0, background: 'linear-gradient(150deg, oklch(0.8 0.07 30), oklch(0.85 0.04 60))' }">
             <span class="lbl">фото · букет недели</span>
@@ -428,6 +429,8 @@ onUnmounted(() => { if (timerId) clearInterval(timerId) })
 
 /* ===== page frame & sections (from Витрина.html <style>) ===== */
 .wrap{max-width:1320px;margin:0 auto;padding:30px 24px 140px;}
+/* мобиль: 140px снизу — слишком большой провал до футера */
+@media(max-width:520px){.wrap{padding:20px 16px 44px;}}
 
 /* hero */
 .hero{display:block;margin:8px 0 22px;}
@@ -558,11 +561,22 @@ onUnmounted(() => { if (timerId) clearInterval(timerId) })
 
 /* subscription cta */
 .subcta{display:grid;grid-template-columns:1.2fr 1fr;border-radius:var(--r);overflow:hidden;border:1px solid var(--line);background:var(--clay-wash);}
-@media(max-width:760px){.subcta{grid-template-columns:1fr;}}
 .subcta .sc-t{padding:40px;}
 .subcta .sc-t h3{font-family:'Montserrat',serif;font-weight:500;font-size:30px;letter-spacing:-.01em;}
 .subcta .sc-t p{color:oklch(0.42 0.05 47);margin:12px 0 22px;max-width:38ch;}
 .subcta .sc-media{position:relative;min-height:220px;}
+.subcta .sc-badge{display:none;position:absolute;top:14px;left:14px;z-index:3;padding:7px 13px;border-radius:999px;background:var(--clay);color:#fff;font-weight:700;font-size:13px;box-shadow:0 4px 14px oklch(0.2 0.02 50 / .32);}
+/* мобиль: вместо «текст-сверху + пустая полоса с фото снизу» — единый баннер,
+   фото на всю площадь, тёплый скрим снизу, текст и бейдж поверх */
+@media(max-width:760px){
+  .subcta{display:block;position:relative;min-height:430px;border-color:transparent;}
+  .subcta .sc-media{position:absolute;inset:0;min-height:0;}
+  .subcta .sc-media::after{content:'';position:absolute;inset:0;background:linear-gradient(to top,oklch(0.2 0.02 50 / .93) 6%,oklch(0.2 0.02 50 / .6) 40%,oklch(0.2 0.02 50 / .1) 74%);}
+  .subcta .sc-badge{display:inline-flex;}
+  .subcta .sc-t{position:absolute;left:0;right:0;bottom:0;z-index:2;padding:0 22px 26px;}
+  .subcta .sc-t h3{color:#fff;font-size:25px;line-height:1.14;text-wrap:balance;}
+  .subcta .sc-t p{color:oklch(1 0 0 / .86);margin:10px 0 18px;max-width:32ch;}
+}
 
 /* trust strip row */
 .trust-row{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:30px;}
@@ -571,4 +585,13 @@ onUnmounted(() => { if (timerId) clearInterval(timerId) })
 .trust-row .tr .ic{width:38px;height:38px;border-radius:10px;background:var(--green-wash);color:var(--green);display:grid;place-items:center;flex:none;}
 .trust-row .tr .tt{font-weight:600;font-size:14px;}
 .trust-row .tr .td{font-size:12.5px;color:var(--ink-faint);margin-top:2px;}
+/* мобиль: на узкой карточке горизонтальная раскладка ломает заголовок по слову —
+   ставим иконку сверху, текст получает всю ширину карточки */
+@media(max-width:520px){
+  .trust-row{gap:10px;margin-top:22px;}
+  .trust-row .tr{flex-direction:column;align-items:flex-start;gap:10px;padding:15px 14px;}
+  .trust-row .tr .ic{width:34px;height:34px;border-radius:9px;}
+  .trust-row .tr .tt{font-size:13.5px;line-height:1.25;text-wrap:balance;}
+  .trust-row .tr .td{font-size:12px;line-height:1.35;text-wrap:pretty;}
+}
 </style>

@@ -45,13 +45,17 @@
 
       <!-- иконки -->
       <div class="hicons">
-        <NuxtLink to="/wishlist" class="hicon" title="Избранное">
+        <!-- поиск (только мобиль): открывает оверлей-поиск -->
+        <button class="hicon hicon--search" type="button" title="Поиск" aria-label="Поиск" @click="openSearch">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+        </button>
+        <NuxtLink to="/wishlist" class="hicon hicon--wish" title="Избранное">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M12 20.3l-1.45-1.32C5.4 14.24 2 11.16 2 7.5 2 4.42 4.42 2 7.5 2c1.74 0 3.41.81 4.5 2.09C13.09 2.81 14.76 2 16.5 2 19.58 2 22 4.42 22 7.5c0 3.66-3.4 6.74-8.55 11.49L12 20.3z"/></svg>
           <span v-if="wishCount > 0" class="dot" />
         </NuxtLink>
-        <a :href="userLink" class="hicon" :title="shopUser ? shopUser.firstName : 'Личный кабинет'">
+        <NuxtLink :to="userLink" class="hicon hicon--user" :title="shopUser ? shopUser.firstName : 'Личный кабинет'">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-3.5 3.6-6 8-6s8 2.5 8 6"/></svg>
-        </a>
+        </NuxtLink>
         <button class="hicon" :class="{ 'cart-bump': cartBump }" title="Корзина" @click="cartDrawer.open">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M6 8h12l1 12H5L6 8zM9 8V6a3 3 0 0 1 6 0v2"/></svg>
           <span v-if="cartCount > 0" class="badge">{{ cartCount }}</span>
@@ -62,21 +66,18 @@
     <!-- ===== РЯД 2: категории ===== -->
     <div class="hcats-wrap">
       <div class="bwide hcats-inner">
-        <div ref="catsEl" class="hcats">
+        <div class="hcats">
           <NuxtLink
             v-for="c in cats"
             :key="c.label"
             :to="c.to"
             class="hcat"
-            :class="{ 'hcat--accent': c.accent }"
+            :class="{ 'is-active': catActive(c) }"
           >
             {{ c.label }}
             <svg v-if="c.caret" class="hcat__car" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
           </NuxtLink>
         </div>
-        <button class="hcats__more" aria-label="Ещё категории" @click="scrollCats">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
-        </button>
       </div>
     </div>
 
@@ -94,7 +95,7 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
           </NuxtLink>
           <NuxtLink to="/wishlist"     @click="menuOpen = false">Избранное <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></NuxtLink>
-          <a :href="userLink"          @click="menuOpen = false">Личный кабинет <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></a>
+          <NuxtLink :to="userLink"     @click="menuOpen = false">Личный кабинет <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></NuxtLink>
         </div>
             <div class="menu__contact">
               <a :href="`tel:${settings.contactPhone}`">{{ settings.contactPhone }}</a>
@@ -163,12 +164,11 @@ const { cartCount } = useCart()
 const { count: wishCount } = useWishlist()
 const settings   = useSettings()
 const { user: shopUser } = useShopUser()
-const { public: { cabinetUrl } } = useRuntimeConfig()
 const cartDrawer = useCartDrawer()
 
-const userLink = computed(() =>
-  shopUser.value ? `${cabinetUrl}/dashboard` : `${cabinetUrl}/login?redirect=/dashboard`
-)
+// Профиль — внутренняя страница сайта /account (она же показывает вход для гостя).
+// Раньше кнопка вела на отдельный поддомен кабинета.
+const userLink = '/account'
 
 const searchInputEl = ref<HTMLInputElement | null>(null)
 const hints = computed(() => settings.value.search.hints)
@@ -176,19 +176,29 @@ const hints = computed(() => settings.value.search.hints)
 /* категории второго ряда */
 const cats = [
   { label: 'Тренды', to: '/catalog?quick=hit' },
-  { label: 'Скидки', to: '/catalog?sale=1', accent: true },
+  { label: 'Скидки', to: '/catalog?sale=1' },
   { label: 'Монобукеты', to: '/catalog?coll=mono' },
   { label: 'В коробке', to: '/catalog?coll=box' },
   { label: 'Авторские', to: '/catalog?coll=author' },
   { label: 'Свадебные', to: '/catalog?coll=wed' },
   { label: 'Подписка', to: '/subscription' },
-  { label: 'Праздники', to: '/catalog', caret: true },
+  { label: 'Праздники', to: '/holiday' },
   { label: 'Подарочные сертификаты', to: '/gift-cards' },
   { label: 'Доставка', to: '/delivery' },
 ]
-const catsEl = ref<HTMLElement | null>(null)
-function scrollCats() {
-  catsEl.value?.scrollBy({ left: 320, behavior: 'smooth' })
+
+/* какая вкладка открыта сейчас — сверяем path + query с `to` каждой вкладки */
+const route = useRoute()
+function catActive(c: { to: string; caret?: boolean }) {
+  if (c.caret) return false                       // «Праздники» — это дропдаун, не подсвечиваем
+  const [path, qs] = c.to.split('?')
+  if (route.path !== path) return false
+  if (!qs) return path !== '/catalog'             // путь-вкладки (подписка/сертификаты/доставка); голый /catalog не активен
+  const params = new URLSearchParams(qs)
+  for (const [k, v] of params) {
+    if (String(route.query[k] ?? '') !== v) return false
+  }
+  return true
 }
 
 const {
@@ -197,6 +207,7 @@ const {
   searchQ,
   cartBump,
   isStuck,
+  openSearch,
   closeSearch,
   goSearch,
 } = useHeaderUiState({
@@ -300,6 +311,8 @@ const {
   position: absolute; top: 9px; right: 10px;
   width: 7px; height: 7px; border-radius: 50%; background: var(--clay);
 }
+/* поиск-иконка только на мобиле (показывается в медиазапросе ≤520) — правило ПОСЛЕ .hicon, чтобы перебить display:grid */
+.hicon--search { display: none; }
 
 /* ====== РЯД 2: категории ====== */
 .hcats-wrap {
@@ -314,20 +327,24 @@ const {
 }
 .hcats::-webkit-scrollbar { display: none; }
 .hcat {
+  position: relative;
   display: inline-flex; align-items: center; gap: 4px; flex: none;
+  height: 50px;
   font-size: 14px; font-weight: 500; color: var(--ink);
   white-space: nowrap; text-decoration: none; transition: color .14s;
 }
-.hcat:hover { color: var(--green); }
-.hcat--accent { color: var(--clay); }
-.hcat__car { width: 14px; height: 14px; opacity: .6; }
-.hcats__more {
-  position: absolute; right: 0; top: 0; bottom: 0; width: 56px;
-  display: grid; place-items: center; border: none; cursor: pointer;
-  color: var(--ink);
-  background: linear-gradient(90deg, transparent, var(--paper) 42%);
+/* индикатор активной/наведённой вкладки — полоска снизу */
+.hcat::after {
+  content: ''; position: absolute; left: 0; right: 0; bottom: 0;
+  height: 2.5px; border-radius: 2px 2px 0 0; background: var(--green);
+  transform: scaleX(0); opacity: 0;
+  transition: transform .18s cubic-bezier(.22, 1, .36, 1), opacity .18s;
 }
-.hcats__more svg { width: 18px; height: 18px; }
+.hcat:hover { color: var(--green); }
+.hcat:hover::after { transform: scaleX(1); opacity: .4; }
+.hcat.is-active { color: var(--green); font-weight: 700; }
+.hcat.is-active::after { transform: scaleX(1); opacity: 1; }
+.hcat__car { width: 14px; height: 14px; opacity: .6; }
 
 /* ====== адаптив ====== */
 @media (max-width: 1100px) {
@@ -347,9 +364,10 @@ const {
 @media (max-width: 520px) {
   .hbar { gap: 8px; }
   .hcat-btn { display: none; }                 /* «Каталог» — в бургер-меню и нижней навигации */
-  .hsearch { min-width: 0; }                   /* поиску разрешаем ужиматься, чтобы шапка влезала */
-  .hicons > .hicon:nth-child(1),
-  .hicons > .hicon:nth-child(2) { display: none; }  /* избранное и кабинет — в нижней навигации */
+  .hsearch { display: none; }                  /* инлайн-поиск прячем — вместо него иконка 🔍 */
+  .hicons { margin-left: auto; }               /* прижимаем иконки вправо (поиск больше не растягивает шапку) */
+  .hicon--wish, .hicon--user { display: none; }   /* избранное и кабинет — в нижней навигации */
+  .hicon--search { display: grid; }            /* показываем иконку поиска (открывает оверлей) */
   .hicon { width: 38px; height: 38px; }
 }
 

@@ -56,13 +56,13 @@
                     <svg v-for="n in 5" :key="n" viewBox="0 0 24 24" fill="currentColor" :style="{ opacity: n <= filled ? 1 : .25 }"><path d="m12 2 2.9 6.3 6.8.7-5 4.6 1.4 6.7L12 17.8 5.9 20.3l1.4-6.7-5-4.6 6.8-.7z"/></svg>
                   </span>
                   <b>{{ rating }}</b>
-                  <span v-if="reviewCount" class="cqv-revs">· {{ reviewCount }} {{ plural(reviewCount, ['отзыв', 'отзыва', 'отзывов']) }}</span>
+                  <span v-if="reviewTotal" class="cqv-revs">· {{ reviewTotal }} {{ plural(reviewTotal, ['отзыв', 'отзыва', 'отзывов']) }}</span>
                 </div>
 
                 <p v-if="subtitle" class="cqv-desc">{{ subtitle }}</p>
 
                 <div class="cqv-price">
-                  <span class="cqv-now serif">{{ fmt(price) }} ₽</span>
+                  <span class="cqv-now serif">{{ fmt(unitPrice) }} ₽</span>
                   <span v-if="oldPrice" class="cqv-old">{{ fmt(oldPrice) }} ₽</span>
                   <span v-if="discount" class="cqv-save">−{{ discount }}%</span>
                 </div>
@@ -90,10 +90,86 @@
                   </div>
                 </div>
 
+                <!-- повод -->
+                <div class="cqv-field">
+                  <div class="cqv-field-h"><span>Повод</span><span class="cqv-field-hint">подберём открытку и тон</span></div>
+                  <div class="cqv-chips">
+                    <button
+                      v-for="o in OCCASIONS"
+                      :key="o.id"
+                      class="cqv-chip"
+                      :class="{ on: occasion === o.id }"
+                      @click="occasion = o.id"
+                    >
+                      <span v-if="o.em" class="cqv-chip-em">{{ o.em }}</span>{{ o.name }}
+                    </button>
+                  </div>
+                </div>
+
+                <!-- открытка -->
+                <div class="cqv-field">
+                  <button class="cqv-card-sw" :class="{ on: cardOn }" type="button" @click="cardOn = !cardOn">
+                    <span class="cqv-card-txt">
+                      <span class="cqv-card-t">Открытка с текстом</span>
+                      <span class="cqv-card-d">Напишем от руки и вложим в букет — бесплатно</span>
+                    </span>
+                    <span class="cqv-toggle" :class="{ on: cardOn }"><span></span></span>
+                  </button>
+                  <div v-if="cardOn" class="cqv-card-box">
+                    <div class="cqv-card-designs">
+                      <button
+                        v-for="d in CARD_DESIGNS"
+                        :key="d.id"
+                        class="cqv-card-design"
+                        :class="{ on: cardDesign === d.id }"
+                        @click="cardDesign = d.id"
+                      >{{ d.em }}</button>
+                      <span class="cqv-card-designs-h">дизайн открытки</span>
+                    </div>
+                    <textarea
+                      class="cqv-card-ta"
+                      maxlength="200"
+                      v-model="cardText"
+                      placeholder="Например: «С днём рождения! Пусть каждый день будет таким же светлым, как эти цветы.»"
+                    ></textarea>
+                    <div class="cqv-card-meta"><span>Почерк флориста, чёрные чернила</span><span>{{ cardText.length }}/200</span></div>
+                  </div>
+                </div>
+
+                <!-- допы -->
+                <div v-if="addonOptions.length" class="cqv-field">
+                  <div class="cqv-field-h"><span>Дополнить букет</span><span class="cqv-field-hint">по желанию</span></div>
+                  <div class="cqv-addons">
+                    <button
+                      v-for="a in addonOptions"
+                      :key="a.id"
+                      class="cqv-addon"
+                      :class="{ on: addonsSel[a.id] }"
+                      @click="toggleAddon(a.id)"
+                    >
+                      <span class="cqv-addon-sw" :style="{ background: a.color }"></span>
+                      <span class="cqv-addon-i">
+                        <span class="cqv-addon-n">{{ a.name }}</span>
+                        <span class="cqv-addon-p">{{ a.label }}</span>
+                      </span>
+                      <span class="cqv-addon-add" :class="{ on: addonsSel[a.id] }">{{ addonsSel[a.id] ? '✓' : '+' }}</span>
+                    </button>
+                  </div>
+                </div>
+
                 <div class="cqv-perks">
                   <span class="cqv-perk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 8h3l1.5-2h7L17 8h3v11H4z"/><circle cx="12" cy="13" r="3"/></svg> Фото перед доставкой</span>
                   <span class="cqv-perk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 19c0-8 6-13 14-13 0 8-6 13-14 13ZM5 19c2-5 5-8 9-10"/></svg> Свежесть 7 дней</span>
                   <span class="cqv-perk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3 5 6v5c0 4.5 3 8 7 10 4-2 7-5.5 7-10V6z"/><path d="m9 12 2 2 4-4"/></svg> Замена при браке</span>
+                </div>
+
+                <div class="cqv-loyal">
+                  <svg viewBox="0 0 24 24" fill="currentColor"><path d="m12 2 2.9 6.3 6.8.7-5 4.6 1.4 6.7L12 17.8 5.9 20.3l1.4-6.7-5-4.6 6.8-.7z"/></svg>
+                  <span>Вернём <b>{{ fmt(points) }} {{ plural(points, ['балл', 'балла', 'баллов']) }}</b> — оплатите ими до 30% следующего заказа</span>
+                </div>
+                <div class="cqv-deliv">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 6h11v9H3zM14 9h4l3 3v3h-7z"/><circle cx="7" cy="18" r="1.6"/><circle cx="17" cy="18" r="1.6"/></svg>
+                  <span>Доставим <b>сегодня к 18:00</b>, если оформите до 16:00. Перед отправкой пришлём фото готового букета в WhatsApp.</span>
                 </div>
               </div>
             </div>
@@ -127,6 +203,68 @@
                 </ol>
               </section>
 
+              <section class="cqv-sec">
+                <h3 class="cqv-sec-t">Идеально в подарок</h3>
+                <div class="cqv-whom">
+                  <span v-for="(w, i) in WHOM" :key="i" class="cqv-whom-chip">{{ w }}</span>
+                </div>
+              </section>
+
+              <!-- ОТЗЫВЫ -->
+              <section class="cqv-sec">
+                <h3 class="cqv-sec-t">Отзывы<template v-if="reviewTotal"> · {{ reviewTotal }}</template></h3>
+                <div class="cqv-rev-head">
+                  <div class="cqv-rev-score">
+                    <div class="cqv-rev-big serif">{{ reviewScore }}</div>
+                    <span class="cqv-stars">
+                      <svg v-for="n in 5" :key="n" viewBox="0 0 24 24" fill="currentColor" :style="{ opacity: n <= Math.round(reviewScore) ? 1 : .25 }"><path d="m12 2 2.9 6.3 6.8.7-5 4.6 1.4 6.7L12 17.8 5.9 20.3l1.4-6.7-5-4.6 6.8-.7z"/></svg>
+                    </span>
+                  </div>
+                  <div class="cqv-rev-bars">
+                    <div v-for="row in revBars" :key="row[0]" class="cqv-rev-bar">
+                      <span>{{ row[0] }}★</span>
+                      <span class="cqv-rev-track"><span class="cqv-rev-fill" :style="{ width: row[1] + '%' }"></span></span>
+                      <span class="cqv-rev-pct">{{ row[1] }}%</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="cqv-reviews">
+                  <div v-for="(r, i) in REVIEWS" :key="i" class="cqv-review">
+                    <div class="cqv-review-h">
+                      <span class="cqv-review-av">{{ (r.n || '?')[0] }}</span>
+                      <span class="cqv-review-meta"><span class="cqv-review-n">{{ r.n }}</span><span class="cqv-review-d">{{ r.d }}</span></span>
+                      <span class="cqv-stars cqv-stars--sm">
+                        <svg v-for="n in 5" :key="n" viewBox="0 0 24 24" fill="currentColor" :style="{ opacity: n <= r.s ? 1 : .25 }"><path d="m12 2 2.9 6.3 6.8.7-5 4.6 1.4 6.7L12 17.8 5.9 20.3l1.4-6.7-5-4.6 6.8-.7z"/></svg>
+                      </span>
+                    </div>
+                    <p class="cqv-review-t">{{ r.t }}</p>
+                  </div>
+                </div>
+              </section>
+
+              <!-- С ЭТИМ ЗАКАЗЫВАЮТ -->
+              <section v-if="related.length" class="cqv-sec">
+                <h3 class="cqv-sec-t">С этим букетом заказывают</h3>
+                <div class="cqv-rel">
+                  <NuxtLink
+                    v-for="(p, i) in related"
+                    :key="i"
+                    class="cqv-rel-card"
+                    :to="p.slug ? `/product/${p.slug}` : '/catalog'"
+                    @click="close"
+                  >
+                    <span class="cqv-rel-media">
+                      <img v-if="p.img" :src="p.img" :alt="p.n" />
+                      <span v-else class="cqv-rel-ph"></span>
+                      <span v-if="p.tag" class="cqv-rel-tag" :class="p.tag[0]">{{ p.tag[1] }}</span>
+                    </span>
+                    <span class="cqv-rel-n">{{ p.n }}</span>
+                    <span v-if="p.c" class="cqv-rel-c">{{ p.c }}</span>
+                    <span class="cqv-rel-p">{{ fmt(p.p) }} ₽<span v-if="p.o" class="cqv-rel-o">{{ fmt(p.o) }} ₽</span></span>
+                  </NuxtLink>
+                </div>
+              </section>
+
               <NuxtLink class="cqv-full" :to="fullLink" @click="close">
                 Открыть полную страницу товара
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M7 17 17 7M9 7h8v8"/></svg>
@@ -146,7 +284,7 @@
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
             </NuxtLink>
             <button v-else class="cqv-cta" @click="addToCart">
-              В корзину<span class="cqv-cta-p">{{ fmt(price * qty) }} ₽</span>
+              В корзину<span class="cqv-cta-p">{{ fmt(total) }} ₽</span>
             </button>
             <NuxtLink class="cqv-cta cqv-cta--ghost" :to="fullLink" @click="close">Купить сейчас</NuxtLink>
           </div>
@@ -158,6 +296,9 @@
 
 <script setup>
 import { ref, computed, watch, nextTick, onBeforeUnmount } from 'vue'
+import { createCartLine } from '~/lib/cart/createCartLine'
+
+const cart = useCart()
 
 const props = defineProps({
   card: { type: Object, default: null },
@@ -168,6 +309,9 @@ const open = computed(() => !!props.card)
 
 /* ---- state ---- */
 const detail = ref(null)
+const reviewsRaw = ref([])
+const recsRaw = ref([])
+const relPool = ref({ items: [] })
 const loading = ref(false)
 const thumb = ref(0)
 const sizeLabel = ref(null)
@@ -176,6 +320,12 @@ const added = ref(false)
 const imgError = ref(false)
 const panel = ref(null)
 const closeBtn = ref(null)
+/* конфигуратор — как на полной странице товара */
+const occasion = ref('birthday')
+const cardOn = ref(true)
+const cardDesign = ref('mini')
+const cardText = ref('')
+const addonsSel = ref({})
 
 /* ---- helpers ---- */
 const fmt = n => Number(n || 0).toLocaleString('ru-RU')
@@ -187,9 +337,48 @@ const plural = (n, [one, few, many]) => {
   if (b === 1) return one
   return many
 }
+const revDate = iso => {
+  if (!iso) return ''
+  try { return new Date(iso).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' }) } catch { return '' }
+}
 const close = () => emit('close')
 
+/* ---- статические данные конфигуратора (как на PDP) ---- */
+const OCCASIONS = [
+  { id: 'birthday', em: '🎂', name: 'День рождения' },
+  { id: 'love', em: '❤️', name: 'Любовь' },
+  { id: 'wedding', em: '💍', name: 'Свадьба' },
+  { id: 'sorry', em: '🕊', name: 'Извинения' },
+  { id: 'thanks', em: '🙏', name: 'Благодарность' },
+  { id: 'none', em: '', name: 'Без повода' },
+]
+const CARD_DESIGNS = [
+  { id: 'mini', em: '✿' },
+  { id: 'kraft', em: '❦' },
+  { id: 'photo', em: '❤' },
+]
+const ADDON_COLORS = ['oklch(0.72 0.05 70)', 'oklch(0.42 0.06 50)', 'oklch(0.82 0.03 230)', 'oklch(0.78 0.07 20)']
+const ADDONS_DEFAULT = [
+  { id: 'bear', name: 'Мишка Тедди', price: 1200 },
+  { id: 'choco', name: 'Конфеты Lindt', price: 990 },
+  { id: 'vase', name: 'Стеклянная ваза', price: 1500 },
+  { id: 'balloon', name: 'Связка шаров', price: 850 },
+]
+const WHOM = ['Маме', 'Любимой', 'Коллеге', 'Подруге', 'Жене', 'Без повода']
+const FALLBACK_REVIEWS = [
+  { n: 'Мария С.', d: '2 недели назад', s: 5, t: 'Заказывала маме на юбилей. Прислали фото перед доставкой — букет ещё пышнее, чем на сайте. Стоял 9 дней!' },
+  { n: 'Дмитрий К.', d: 'месяц назад', s: 5, t: 'Собрали за час, привезли точно в слот 16:00–18:00. Цветы свежие, упаковка аккуратная. Жена в восторге.' },
+  { n: 'Анна В.', d: 'месяц назад', s: 4, t: 'Красивый букет, но хотелось чуть больше зелени. В остальном всё на высоте, открытка от руки — приятная мелочь.' },
+]
+const FALLBACK_RELATED = [
+  { n: 'Невский букет', c: 'Кустовые розы, фрезия', p: 4200, o: 0, tag: ['new', 'Новинка'], slug: '', img: '' },
+  { n: 'Нежность в коробке', c: 'Пионовидные розы', p: 5800, o: 6900, tag: ['sale', '−16%'], slug: '', img: '' },
+  { n: 'Летнее поле', c: 'Сезонный микс', p: 3400, o: 0, tag: ['hit', 'Хит'], slug: '', img: '' },
+  { n: 'Свадебный пион', c: 'Розы, гипсофила', p: 6500, o: 0, tag: null, slug: '', img: '' },
+]
 const TAG_MAP = { hit: ['hit', 'Хит'], new: ['new', 'Новинка'], sale: ['sale', 'Скидка'] }
+const TAGc_REL = { 'Хит': 'hit', 'Новинка': 'new', 'Скидка': 'sale', 'Премиум': 'hit' }
+
 const tagArr = computed(() => {
   const t = props.card?.tag
   if (!t) return null
@@ -197,12 +386,11 @@ const tagArr = computed(() => {
   return TAG_MAP[t] || ['hit', t]
 })
 
-/* ---- derived ---- */
+/* ---- derived: основное ---- */
 const title = computed(() => detail.value?.name || props.card?.n || 'Букет')
 const subtitle = computed(() => detail.value?.description || detail.value?.meta || props.card?.c || '')
 const rating = computed(() => Number(detail.value?.rating ?? props.card?.r ?? 4.9).toFixed(1))
 const filled = computed(() => Math.round(Number(rating.value)))
-const reviewCount = computed(() => Number(detail.value?.reviewCount || 0))
 const images = computed(() => {
   const d = detail.value?.images
   if (Array.isArray(d) && d.filter(Boolean).length) return d.filter(Boolean)
@@ -211,14 +399,30 @@ const images = computed(() => {
 const mainImg = computed(() => images.value[thumb.value] || images.value[0] || null)
 const sizes = computed(() => Array.isArray(detail.value?.sizes) ? detail.value.sizes : [])
 const activeSize = computed(() => sizes.value.find(s => s.label === sizeLabel.value) || null)
-const price = computed(() => activeSize.value?.price || detail.value?.price || props.card?.p || 0)
+
+/* ---- цена (размер + допы) × кол-во ---- */
+const sizePrice = computed(() => activeSize.value?.price || detail.value?.price || props.card?.p || 0)
+const priceLabel = p => `+${fmt(p)} ₽`
+const addonOptions = computed(() => {
+  const arr = detail.value?.addons
+  // у API: name = название, display = ценник («+ 1 200 ₽» / «бесплатно»); price = число
+  const base = Array.isArray(arr) && arr.length
+    ? arr.map((a, i) => ({ id: a.name || String(i), name: a.name || '', price: Number(a.price) || 0, label: a.display || priceLabel(Number(a.price) || 0) }))
+    : ADDONS_DEFAULT.map(a => ({ ...a, label: priceLabel(a.price) }))
+  return base.map((a, i) => ({ ...a, color: ADDON_COLORS[i % ADDON_COLORS.length] }))
+})
+const addonsTotal = computed(() => addonOptions.value.reduce((s, a) => s + (addonsSel.value[a.id] ? a.price : 0), 0))
+const unitPrice = computed(() => sizePrice.value + addonsTotal.value)
+const total = computed(() => unitPrice.value * qty.value)
+const points = computed(() => Math.round(total.value * 0.05))
 const oldPrice = computed(() => {
   const o = Number(props.card?.o || 0)
-  return o > price.value ? o : 0
+  return o > sizePrice.value ? o : 0
 })
-const discount = computed(() => oldPrice.value ? Math.round((1 - price.value / oldPrice.value) * 100) : 0)
+const discount = computed(() => oldPrice.value ? Math.round((1 - sizePrice.value / oldPrice.value) * 100) : 0)
 const fullLink = computed(() => props.card?.slug ? `/product/${props.card.slug}` : '/product/test')
 
+/* ---- состав / уход / характеристики ---- */
 const composition = computed(() => Array.isArray(detail.value?.composition) ? detail.value.composition.filter(c => c && c.name) : [])
 const careSteps = computed(() => {
   const raw = detail.value?.careInstructions
@@ -231,7 +435,51 @@ const specs = computed(() => {
   out.push(['Свежесть', 'до 7 дней'])
   out.push(['Сборка', 'за 2 часа'])
   out.push(['Упаковка', 'авторская'])
+  out.push(['Фото', 'перед доставкой'])
+  out.push(['Замена', 'при браке'])
   return out
+})
+
+/* ---- отзывы ---- */
+const REVIEWS = computed(() => {
+  const list = Array.isArray(reviewsRaw.value) ? reviewsRaw.value.filter(r => r && r.text) : []
+  if (!list.length) return FALLBACK_REVIEWS
+  return list.map(r => ({ n: r.name || 'Гость', d: revDate(r.createdAt), s: r.rating || 5, t: r.text }))
+})
+const reviewTotal = computed(() => {
+  const real = Array.isArray(reviewsRaw.value) ? reviewsRaw.value.filter(r => r && r.text).length : 0
+  return real || Number(detail.value?.reviewCount || 0)
+})
+const reviewScore = computed(() => {
+  const list = REVIEWS.value
+  if (!list.length) return rating.value
+  return (list.reduce((a, r) => a + (Number(r.s) || 0), 0) / list.length).toFixed(1)
+})
+const revBars = computed(() => {
+  const list = REVIEWS.value
+  const tot = list.length || 1
+  return [5, 4, 3, 2, 1].map(star => {
+    const c = list.filter(r => Math.round(Number(r.s) || 0) === star).length
+    return [star, Math.round((c / tot) * 100)]
+  })
+})
+
+/* ---- рекомендации ---- */
+const mapRel = p => ({
+  n: p.name,
+  c: p.meta || '',
+  p: p.price || 0,
+  o: p.oldPrice || 0,
+  tag: p.tag ? [TAGc_REL[p.tag] || 'hit', p.tag] : null,
+  slug: p.slug || '',
+  img: (p.images && p.images[0]) || '',
+})
+const related = computed(() => {
+  const recs = Array.isArray(recsRaw.value) ? recsRaw.value : []
+  if (recs.length) return recs.slice(0, 4).map(mapRel)
+  const pool = (relPool.value?.items || []).filter(p => p.slug && p.slug !== props.card?.slug)
+  if (pool.length) return pool.slice(0, 4).map(mapRel)
+  return FALLBACK_RELATED
 })
 
 /* ---- избранное / поделиться ---- */
@@ -246,7 +494,6 @@ function toggleLike() {
 const shareCopied = ref(false)
 async function shareProduct() {
   const url = (import.meta.client ? location.origin : '') + fullLink.value
-  // на тач-устройствах — нативный шэр (WhatsApp/Telegram), на десктопе — копируем ссылку
   const isTouch = import.meta.client && navigator.maxTouchPoints > 0
   if (isTouch && navigator.share) {
     try { await navigator.share({ title: title.value, url }) } catch (_) {}
@@ -258,30 +505,58 @@ async function shareProduct() {
 }
 
 /* ---- actions ---- */
+function toggleAddon(id) {
+  addonsSel.value = { ...addonsSel.value, [id]: !addonsSel.value[id] }
+}
 function addToCart() {
-  // Оптимистично, как на полной странице товара. Реальная корзина (useCart)
-  // на переписанных страницах пока не подключена — это отдельная задача.
+  const chosen = addonOptions.value.filter(a => addonsSel.value[a.id]).map(a => a.name)
+  cart.addLine(createCartLine({
+    slug: props.card?.slug || detail.value?.slug || '',
+    name: title.value,
+    bloom: detail.value?.bloom || props.card?.bloom || 'rose',
+    image: mainImg.value || undefined,
+    meta: activeSize.value?.label || subtitle.value,
+    sizeLabel: activeSize.value?.label || '',
+    price: unitPrice.value,
+    qty: qty.value,
+    addons: chosen,
+  }))
   added.value = true
 }
+// сброс «добавлено» при смене конфигурации
+watch([sizeLabel, qty, occasion, () => JSON.stringify(addonsSel.value)], () => { added.value = false })
 
-/* ---- lifecycle: fetch detail, lock scroll, esc, focus ---- */
+/* ---- lifecycle: fetch detail/reviews/recs, lock scroll, esc, focus ---- */
 function onKey(e) { if (e.key === 'Escape') close() }
 
 watch(() => props.card, async (c) => {
   detail.value = null
+  reviewsRaw.value = []
+  recsRaw.value = []
+  relPool.value = { items: [] }
   thumb.value = 0
   qty.value = 1
   added.value = false
   imgError.value = false
   sizeLabel.value = null
+  occasion.value = 'birthday'
+  cardOn.value = true
+  cardDesign.value = 'mini'
+  cardText.value = ''
+  addonsSel.value = {}
   if (!c || !c.slug) return
 
   loading.value = true
-  try {
-    detail.value = await $fetch(`/api/products/${c.slug}`)
-  } catch {
-    detail.value = null
-  }
+  const [d, rv, rc, pl] = await Promise.all([
+    $fetch(`/api/products/${c.slug}`).catch(() => null),
+    $fetch(`/api/reviews/product/${c.slug}`).catch(() => []),
+    $fetch(`/api/products/${c.slug}/recommendations`).catch(() => []),
+    $fetch('/api/products/catalog', { query: { limit: 6 } }).catch(() => ({ items: [] })),
+  ])
+  detail.value = d
+  reviewsRaw.value = Array.isArray(rv) ? rv : []
+  recsRaw.value = Array.isArray(rc) ? rc : []
+  relPool.value = pl && pl.items ? pl : { items: [] }
   loading.value = false
 
   const sz = detail.value?.sizes
@@ -446,6 +721,70 @@ onBeforeUnmount(() => {
 }
 @keyframes cqvshimmer { to { background-position: -200% 0; } }
 
+/* повод / чипы */
+.cqv-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.cqv-chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 13px; border: 1px solid var(--line-strong); border-radius: 30px;
+  background: var(--card); font-family: inherit; font-size: 13px; font-weight: 500; color: var(--ink-soft);
+  cursor: pointer; transition: .14s;
+}
+.cqv-chip-em { font-size: 14px; line-height: 1; }
+.cqv-chip:hover { border-color: var(--green-soft); }
+.cqv-chip.on { border-color: var(--green); background: var(--green-wash); color: var(--ink); }
+
+/* открытка */
+.cqv-card-sw {
+  width: 100%; display: flex; align-items: center; gap: 12px;
+  padding: 14px 16px; border: 1px solid var(--line-strong); border-radius: 13px;
+  background: var(--card); cursor: pointer; text-align: left; font-family: inherit; transition: .14s;
+}
+.cqv-card-sw.on { border-color: var(--green); background: var(--green-wash); }
+.cqv-card-txt { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.cqv-card-t { font-weight: 600; font-size: 14px; color: var(--ink); }
+.cqv-card-d { font-size: 12.5px; color: var(--ink-faint); margin-top: 2px; }
+.cqv-toggle { flex: none; width: 42px; height: 24px; border-radius: 30px; background: var(--line-strong); position: relative; transition: background .16s; }
+.cqv-toggle > span { position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; border-radius: 50%; background: #fff; transition: transform .16s; box-shadow: 0 1px 3px oklch(0.2 0.02 60 / .25); }
+.cqv-toggle.on { background: var(--green); }
+.cqv-toggle.on > span { transform: translateX(18px); }
+.cqv-card-box { margin-top: 12px; }
+.cqv-card-designs { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+.cqv-card-design {
+  width: 38px; height: 38px; border: 1px solid var(--line-strong); border-radius: 9px;
+  background: var(--card); color: var(--clay); font-size: 16px; cursor: pointer;
+  display: grid; place-items: center; transition: .14s;
+}
+.cqv-card-design.on { border-color: var(--green); background: var(--green-wash); }
+.cqv-card-designs-h { font-size: 12.5px; color: var(--ink-faint); }
+.cqv-card-ta {
+  width: 100%; min-height: 72px; resize: vertical;
+  border: 1px solid var(--line-strong); border-radius: 11px; padding: 11px 13px;
+  font-family: inherit; font-size: 13.5px; line-height: 1.5; color: var(--ink); background: var(--paper); outline: none; transition: border-color .14s;
+}
+.cqv-card-ta:focus { border-color: var(--green); }
+.cqv-card-meta { display: flex; justify-content: space-between; font-size: 12px; color: var(--ink-faint); margin-top: 6px; }
+
+/* допы */
+.cqv-addons { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+.cqv-addon {
+  display: flex; align-items: center; gap: 10px; padding: 9px 11px;
+  border: 1px solid var(--line-strong); border-radius: 12px; background: var(--card);
+  cursor: pointer; text-align: left; font-family: inherit; transition: .14s;
+}
+.cqv-addon.on { border-color: var(--green); background: var(--green-wash); }
+.cqv-addon-sw { flex: none; width: 30px; height: 30px; border-radius: 8px; }
+.cqv-addon-i { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.cqv-addon-n { font-size: 13px; font-weight: 600; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cqv-addon-p { font-size: 12px; color: var(--ink-faint); font-variant-numeric: tabular-nums; }
+.cqv-addon-add { flex: none; width: 26px; height: 26px; border-radius: 7px; border: 1px solid var(--line-strong); display: grid; place-items: center; font-size: 15px; color: var(--ink-soft); }
+.cqv-addon-add.on { background: var(--green); border-color: var(--green); color: #fff; }
+
+/* лояльность / доставка */
+.cqv-loyal, .cqv-deliv { display: flex; gap: 9px; align-items: flex-start; font-size: 13px; line-height: 1.45; color: var(--ink-soft); margin-top: 14px; }
+.cqv-loyal { color: var(--green-soft); }
+.cqv-loyal b, .cqv-deliv b { color: var(--ink); }
+.cqv-loyal svg, .cqv-deliv svg { width: 16px; height: 16px; flex: none; margin-top: 1px; color: var(--green-soft); }
+
 .cqv-perks { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
 .cqv-perk {
   display: inline-flex; align-items: center; gap: 6px;
@@ -456,19 +795,58 @@ onBeforeUnmount(() => {
 
 /* ---- секции ---- */
 .cqv-sections { padding: 6px 30px 26px; }
-.cqv-sec { padding: 20px 0; }
+.cqv-sec { padding: 20px 0; border-top: 1px solid var(--line); }
+.cqv-sec:first-child { border-top: none; }
 .cqv-sec-t { font-family: 'Montserrat', system-ui, sans-serif; font-weight: 600; font-size: 17px; margin: 0 0 14px; }
 .cqv-comp { display: flex; flex-direction: column; }
 .cqv-comp-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 7px 0; }
 .cqv-comp-n { font-weight: 500; font-size: 14px; }
 .cqv-comp-q { color: var(--ink-faint); font-size: 13px; font-variant-numeric: tabular-nums; }
-.cqv-specs { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+.cqv-specs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
 .cqv-spec { background: var(--card); padding: 12px 14px; display: flex; flex-direction: column; gap: 2px; }
 .cqv-spec-k { font-size: 11.5px; text-transform: uppercase; letter-spacing: .04em; color: var(--ink-faint); }
 .cqv-spec-v { font-size: 14px; font-weight: 600; }
 .cqv-care { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 12px; }
 .cqv-care li { display: flex; gap: 11px; font-size: 14px; line-height: 1.5; color: var(--ink-soft); }
 .cqv-care-n { flex: none; width: 23px; height: 23px; border-radius: 7px; background: var(--green-wash); color: var(--green); font-weight: 700; font-size: 12px; display: grid; place-items: center; }
+
+/* идеально в подарок */
+.cqv-whom { display: flex; flex-wrap: wrap; gap: 8px; }
+.cqv-whom-chip { font-size: 13px; font-weight: 500; color: var(--ink-soft); background: var(--paper); border: 1px solid var(--line); border-radius: 30px; padding: 6px 13px; }
+
+/* отзывы */
+.cqv-rev-head { display: flex; align-items: center; gap: 22px; flex-wrap: wrap; margin-bottom: 18px; }
+.cqv-rev-score { display: flex; align-items: center; gap: 12px; }
+.cqv-rev-big { font-size: 40px; font-weight: 600; line-height: 1; }
+.cqv-rev-bars { flex: 1; min-width: 170px; display: flex; flex-direction: column; gap: 4px; }
+.cqv-rev-bar { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--ink-faint); }
+.cqv-rev-track { flex: 1; height: 6px; border-radius: 4px; background: var(--line); overflow: hidden; }
+.cqv-rev-fill { display: block; height: 100%; background: var(--clay); border-radius: 4px; }
+.cqv-rev-pct { font-variant-numeric: tabular-nums; min-width: 30px; text-align: right; }
+.cqv-reviews { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+.cqv-review { border: 1px solid var(--line); border-radius: 13px; padding: 15px; background: var(--card); }
+.cqv-review-h { display: flex; align-items: center; gap: 9px; margin-bottom: 9px; }
+.cqv-review-av { width: 34px; height: 34px; border-radius: 50%; background: var(--green-wash); color: var(--green); font-weight: 700; display: grid; place-items: center; font-size: 14px; flex: none; }
+.cqv-review-meta { display: flex; flex-direction: column; flex: 1; min-width: 0; }
+.cqv-review-n { font-weight: 600; font-size: 13.5px; }
+.cqv-review-d { font-size: 12px; color: var(--ink-faint); }
+.cqv-review-t { margin: 0; font-size: 13.5px; line-height: 1.5; color: var(--ink-soft); }
+.cqv-stars--sm { color: var(--clay); }
+.cqv-stars--sm svg { width: 13px; height: 13px; }
+
+/* с этим заказывают */
+.cqv-rel { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.cqv-rel-card { display: flex; flex-direction: column; text-decoration: none; color: inherit; }
+.cqv-rel-media { position: relative; aspect-ratio: 1 / 1; border-radius: 12px; overflow: hidden; background: oklch(0.93 0.012 80); margin-bottom: 8px; }
+.cqv-rel-media img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.cqv-rel-tag { position: absolute; top: 8px; left: 8px; font-size: 10.5px; font-weight: 700; text-transform: uppercase; padding: 3px 7px; border-radius: 5px; }
+.cqv-rel-tag.hit { background: var(--clay); color: #fff; }
+.cqv-rel-tag.new { background: var(--green); color: #fff; }
+.cqv-rel-tag.sale { background: var(--blush); color: oklch(0.32 0.06 24); }
+.cqv-rel-n { font-size: 13px; font-weight: 600; line-height: 1.25; }
+.cqv-rel-c { font-size: 11.5px; color: var(--ink-faint); margin-top: 2px; line-height: 1.3; }
+.cqv-rel-p { font-size: 13.5px; font-weight: 700; margin-top: 5px; font-variant-numeric: tabular-nums; }
+.cqv-rel-o { font-size: 11.5px; color: var(--ink-faint); text-decoration: line-through; margin-left: 6px; font-weight: 400; }
 
 .cqv-full {
   margin-top: 22px; width: 100%;
@@ -519,11 +897,15 @@ onBeforeUnmount(() => {
   .cqv-main { min-height: 0; aspect-ratio: 4 / 3; }
   .cqv-info { padding: 22px 18px; }
   .cqv-sections { padding: 4px 18px 20px; }
+  .cqv-specs { grid-template-columns: repeat(2, 1fr); }
+  .cqv-reviews { grid-template-columns: 1fr; }
+  .cqv-rel { grid-template-columns: repeat(2, 1fr); }
   .cqv-bar { padding: 12px 16px calc(12px + env(safe-area-inset-bottom)); flex-wrap: wrap; }
   .cqv-cta { font-size: 14.5px; }
   .cqv-cta--ghost { flex: 1; min-width: 0; }
 }
 @media (max-width: 420px) {
+  .cqv-addons { grid-template-columns: 1fr; }
   .cqv-bar .cqv-cta--ghost { display: none; }
 }
 

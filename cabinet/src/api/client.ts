@@ -3,6 +3,12 @@ import { toCabinetApiError } from './errors'
 
 export const BASE = import.meta.env.VITE_API_BASE ?? ''
 
+export function apiUrl(path: string): string {
+  const normalizedBase = BASE.replace(/\/+$/, '')
+  const normalizedPath = path.startsWith('/') ? path : `/${path}`
+  return `${normalizedBase}${normalizedPath}`
+}
+
 function logApiError(error: unknown, normalized: Error & { status?: number }) {
   if (!import.meta.env.DEV) return
 

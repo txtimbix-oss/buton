@@ -32,8 +32,15 @@
           <span class="eyebrow">Подборки</span>
           <h2 class="h-section holiday-section-title">Праздничные подборки</h2>
         <div class="grid-cards cols-3">
-            <article v-for="item in holidayCards" :key="item.title" class="holiday-card">
-            <BloomImg :kind="item.kind" class="holiday-card__media" :label="item.kindLabel" />
+            <article v-for="(item, i) in holidayCards" :key="item.title" class="holiday-card">
+            <div class="holiday-card__media">
+              <template v-if="cardImages[i]">
+                <img :src="cardImages[i]" :alt="item.title" class="holiday-card__img" loading="lazy" />
+                <span class="holiday-card__scrim" />
+                <span class="holiday-card__tag">{{ item.kindLabel }}</span>
+              </template>
+              <BloomImg v-else :kind="item.kind" :label="item.kindLabel" class="holiday-card__bloom" />
+            </div>
             <div class="holiday-card__body">
               <h3 class="holiday-card__title">{{ item.title }}</h3>
               <p class="body-sm holiday-card__text">{{ item.text }}</p>
@@ -96,6 +103,26 @@ const { holidayCards, comboPacks, faqItems } = useHolidayPageContent({
   jsonLd,
 })
 
+/* реальные фото товаров с бэка для карточек подборок (вместо абстрактных плейсхолдеров).
+   По возможности подбираем по «настроению» карточки: kind (rose/green/cream) → bloom товара. */
+const { data: holidayPool } = await useFetch('/api/products/catalog', {
+  query: { limit: 24, inStockOnly: true },
+  default: () => ({ items: [] as Array<{ bloom?: string; images?: string[] }> }),
+})
+const KIND_BLOOM: Record<string, string[]> = {
+  rose: ['rose', 'pink', 'peach', 'red'],
+  green: ['green', 'mix'],
+  cream: ['cream', 'white'],
+}
+const cardImages = computed(() => {
+  const items = (holidayPool.value?.items || []).filter(p => p.images && p.images[0])
+  return holidayCards.value.map((c, i) => {
+    const wants = KIND_BLOOM[c.kind] || []
+    const match = items.find(p => p.bloom && wants.includes(p.bloom))
+    return (match && match.images![0]) || (items[i] && items[i].images![0]) || ''
+  })
+})
+
 useSeoMeta(() => ({
   title:       `Праздничные букеты — ${settings.value.storeName}`,
   description: `Подборки букетов к праздникам: День рождения, годовщины, юбилеи, торжества. Фото перед отправкой, быстрая доставка и идеи подарков.`,
@@ -136,7 +163,17 @@ const openFaq = ref('')
   border-radius: var(--r-md);
   overflow: hidden;
 }
-.holiday-card__media { height: 190px; }
+.holiday-card__media { position: relative; height: 190px; overflow: hidden; background: var(--paper-2); }
+.holiday-card__bloom { width: 100%; height: 100%; }
+.holiday-card__img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+.holiday-card__scrim { position: absolute; inset: 0; background: linear-gradient(to top, oklch(0.2 0.02 60 / .55), transparent 55%); }
+.holiday-card__tag {
+  position: absolute; left: 14px; bottom: 14px; z-index: 2;
+  font-size: 11px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase;
+  color: #fff; background: oklch(0.25 0.02 60 / .5);
+  -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px);
+  padding: 5px 11px; border-radius: 20px;
+}
 .holiday-card__body { padding: 20px; }
 .holiday-card__title {
   font-family: var(--serif);
