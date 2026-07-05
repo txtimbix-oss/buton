@@ -454,7 +454,7 @@ const CatalogSidebar = () => {
 /* ===== product grid (из buton.css) ===== */
 .cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
 @media (max-width: 980px) { .cards { grid-template-columns: repeat(2, 1fr); } }
-@media (max-width: 520px) { .cards { grid-template-columns: 1fr; } }
+@media (max-width: 520px) { .cards { grid-template-columns: repeat(2, 1fr); gap: 12px; } }
 
 /* ===== заголовок каталога (из Каталог.html) ===== */
 .cat-head { margin-bottom: 20px; }
@@ -497,7 +497,19 @@ const CatalogSidebar = () => {
 /* override card grid внутри каталога */
 .cat-grid .cards { grid-template-columns: repeat(3, 1fr); }
 @media (max-width: 1180px) { .cat-grid .cards { grid-template-columns: repeat(2, 1fr); } }
-@media (max-width: 520px) { .cat-grid .cards { grid-template-columns: 1fr; } }
+@media (max-width: 520px) { .cat-grid .cards { grid-template-columns: repeat(2, 1fr); } }
+
+/* ===== мобилка: карточки в 2 колонки → компактный оверлей, чтобы не «растягивало» ===== */
+@media (max-width: 520px) {
+  .pcard .pb { left: 7px; right: 7px; bottom: 7px; padding: 10px 11px; border-radius: 13px; }
+  .pcard .pn { font-size: 13.5px; line-height: 1.2; }
+  .pcard .pc { font-size: 11px; margin: 2px 0 8px; }
+  .pcard .pp .n { font-size: 15px; }
+  .pcard .pp .o { font-size: 12px; }
+  .pcard .prate { font-size: 11.5px; }
+  .pcard .pm .like { width: 30px; height: 30px; top: 8px; right: 8px; }
+  .pcard .pm .tag { top: 8px; left: 8px; }
+}
 
 /* ===== pagination ===== */
 .pager { display: flex; justify-content: center; align-items: center; gap: 8px; margin-top: 36px; }

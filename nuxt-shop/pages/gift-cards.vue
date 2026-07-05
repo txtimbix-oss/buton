@@ -209,9 +209,10 @@ function submit () {
 .gc-field textarea.inp{height:auto;min-height:66px;padding:10px 13px;resize:vertical;line-height:1.45;}
 .gc-field .inp:focus{outline:none;border-color:var(--green-soft);box-shadow:0 0 0 3px var(--green-wash);}
 .gc-field .frow{display:grid;grid-template-columns:1fr 1fr;gap:11px;}
-.formats{display:flex;gap:10px;}
-.fmt{flex:1;border:1px solid var(--line-strong);border-radius:10px;padding:12px;text-align:center;cursor:pointer;font-size:13.5px;font-weight:500;transition:.14s;}
+.formats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+.fmt{border:1px solid var(--line-strong);border-radius:10px;padding:12px 10px;text-align:center;cursor:pointer;font-size:13.5px;font-weight:500;transition:.14s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .fmt.on{border-color:var(--green);background:var(--green-wash);color:var(--green);font-weight:600;}
+@media(max-width:520px){.formats{grid-template-columns:1fr;}.fmt{text-align:left;padding:13px 15px;}}
 .gc-buy{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-top:8px;}
 .gc-buy .total{font-family:'Montserrat',serif;font-size:24px;font-weight:600;font-variant-numeric:tabular-nums;}
 .gc-buy .btn-primary{flex:1;height:52px;}

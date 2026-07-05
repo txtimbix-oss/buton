@@ -10,8 +10,8 @@
       <h1 class="serif">Войдите в личный кабинет</h1>
       <p>Заказы, бонусы, достижения и персональные предложения — в одном месте.</p>
       <div class="acc-guest__btns">
-        <a class="btn-primary" :href="loginUrl">Войти</a>
-        <a class="ghost-btn" :href="registerUrl">Создать аккаунт</a>
+        <NuxtLink class="btn-primary" to="/login">Войти</NuxtLink>
+        <NuxtLink class="ghost-btn" to="/register">Создать аккаунт</NuxtLink>
       </div>
     </div>
 
@@ -177,11 +177,6 @@
 
 <script setup lang="ts">
 useSeoMeta({ title: 'Личный кабинет — Бутон' })
-
-const { public: { cabinetUrl } } = useRuntimeConfig()
-const cabBase = String(cabinetUrl || 'https://user.butonshop.ru').replace(/\/+$/, '')
-const loginUrl = `${cabBase}/login`
-const registerUrl = `${cabBase}/register`
 
 const fmt = (n: number) => Number(n || 0).toLocaleString('ru-RU')
 const num = (v: any) => Number(v || 0)

@@ -147,11 +147,10 @@ const { data: settings } = await useFetch('/api/settings/public', { default: () 
 const { user, fetchUser } = useShopUser()
 onMounted(() => { fetchUser() })
 
-const { public: { cabinetUrl } } = useRuntimeConfig()
-const cabBase = String(cabinetUrl || '').replace(/\/$/, '')
-const joinUrl = `${cabBase}/register`
-const loginUrl = `${cabBase}/login`
-const cabinetHome = `${cabBase}/bonus`
+// Вход/регистрация и кабинет — на основном сайте (не поддомен)
+const joinUrl = '/register'
+const loginUrl = '/login'
+const cabinetHome = '/account'
 
 /* ── настройки бонусов ── */
 const referralOn = computed(() => String(settings.value?.referralEnabled) === 'true')

@@ -26,7 +26,8 @@ export default defineEventHandler(async (event) => {
   // В dev бэк-авторизация отдаёт 500 на незнакомый Origin (http://localhost:*).
   // Подменяем localhost-origin на доверенный прод-origin, который бэк знает (CORS-whitelist).
   // Хардкод, а не siteUrl: в dev .env siteUrl сам по себе localhost.
-  if (origin && /^https?:\/\/(localhost|127\.0\.0\.1)/i.test(origin)) {
+  const isLocal = !!origin && /^https?:\/\/(localhost|127\.0\.0\.1)/i.test(origin)
+  if (isLocal) {
     origin = 'https://butonshop.ru'
     referer = 'https://butonshop.ru/'
   }
@@ -37,5 +38,23 @@ export default defineEventHandler(async (event) => {
 
   return proxyRequest(event, `${apiBase}${path}`, {
     headers: Object.keys(headers).length ? headers : undefined,
+    // Dev-only: бэк ставит куку user_token на «Domain=.butonshop.ru; Secure; SameSite=None».
+    // На http://localhost браузер её отвергнет → вход/регистрация на localhost не сохранялись бы.
+    // Снимаем Domain (host-only), Secure и меняем SameSite=None→Lax. В prod НЕ трогаем — там
+    // нужен общий домен (.butonshop.ru), чтобы кука шарилась между сайтом и кабинетом.
+    // NB: h3-шный cookieDomainRewrite:'' не годится — пустая строка у h3 falsy и рерайт пропускается,
+    // поэтому правим Set-Cookie руками в onResponse (он вызывается уже после записи заголовка).
+    ...(isLocal ? {
+      onResponse(ev: typeof event) {
+        const sc = ev.node.res.getHeader('set-cookie')
+        if (!sc) return
+        const list = (Array.isArray(sc) ? sc : [String(sc)]).map(c =>
+          String(c)
+            .replace(/;\s*Domain=[^;]+/gi, '')
+            .replace(/;\s*Secure/gi, '')
+            .replace(/;\s*SameSite=None/gi, '; SameSite=Lax'))
+        ev.node.res.setHeader('set-cookie', list)
+      },
+    } : {}),
   })
 })

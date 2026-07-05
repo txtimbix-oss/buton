@@ -179,10 +179,9 @@ const hints = computed(() => settings.value.search.hints)
 const cats = [
   { label: 'Тренды', to: '/catalog?quick=hit' },
   { label: 'Скидки', to: '/catalog?sale=1' },
-  { label: 'Монобукеты', to: '/catalog?coll=mono' },
-  { label: 'В коробке', to: '/catalog?coll=box' },
-  { label: 'Авторские', to: '/catalog?coll=author' },
-  { label: 'Свадебные', to: '/catalog?coll=wed' },
+  // Монобукеты/В коробке/Авторские/Свадебные дублировали чипы на странице каталога
+  // (клик подсвечивал зелёным и сверху, и снизу) — свёрнуты в один общий пункт.
+  { label: 'Букеты', to: '/catalog' },
   { label: 'Подписка', to: '/subscription' },
   { label: 'Праздники', to: '/holiday' },
   { label: 'Подарочные сертификаты', to: '/gift-cards' },
@@ -323,9 +322,12 @@ const {
 }
 .hcats-inner { position: relative; }
 .hcats {
-  display: flex; align-items: center; gap: clamp(16px, 1.8vw, 28px);
+  display: flex; align-items: center; gap: clamp(18px, 2.4vw, 40px);
   height: 50px; overflow-x: auto; scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
+  /* пунктов стало меньше — центрируем ряд, чтобы не было пустоты справа.
+     safe: при переполнении (мобилка) откатывается к flex-start, первый пункт не обрезается. */
+  justify-content: safe center;
 }
 .hcats::-webkit-scrollbar { display: none; }
 .hcat {
