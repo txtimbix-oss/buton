@@ -1,168 +1,118 @@
 <template>
-  <article class="card" :data-slug="p.slug">
-    <div class="card__media">
-      <NuxtLink :to="`/product/${p.slug}`" class="card__media-link" :aria-label="p.name">
-        <BloomImg :kind="p.bloom" />
-        <ShopImg
-          v-if="p.images?.[0] && !imgError"
-          :src="p.images[0]"
-          :alt="p.name"
-          class="card__real-img"
-          sizes="(max-width: 768px) 47vw, (max-width: 1100px) 30vw, 260px"
-          @error="imgError = true"
-        />
-      </NuxtLink>
-      <!-- тег -->
-      <span v-if="p.tag" :class="`card__tag tag ${tagClass}`">{{ p.tag }}</span>
-      <!-- избранное -->
+  <NuxtLink class="pcard" :to="p.slug ? `/product/${p.slug}` : '/product/test'">
+    <div class="pm">
+      <BloomImg :kind="p.bloom" />
+      <ShopImg
+        v-if="p.images?.[0] && !imgError"
+        :src="p.images[0]"
+        :alt="p.name"
+        class="pcard-img"
+        sizes="(max-width: 768px) 47vw, (max-width: 1100px) 30vw, 260px"
+        @error="imgError = true"
+      />
+      <span v-if="p.tag" class="tag" :class="tagCls">{{ p.tag }}</span>
       <button
-        class="card__fav" :class="{ 'is-on': isFaved }"
-        :title="isFaved ? 'Убрать из избранного' : 'В избранное'"
-        @click.prevent="wishlist.toggle(p.slug)"
+        class="like" :class="{ on: isFaved }"
+        :aria-label="isFaved ? 'Убрать из избранного' : 'В избранное'"
+        @click.prevent="p.slug && wishlist.toggle(p.slug)"
       >
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M12 20.3l-1.45-1.32C5.4 14.24 2 11.16 2 7.5 2 4.42 4.42 2 7.5 2c1.74 0 3.41.81 4.5 2.09C13.09 2.81 14.76 2 16.5 2 19.58 2 22 4.42 22 7.5c0 3.66-3.4 6.74-8.55 11.49L12 20.3z"/></svg>
       </button>
-      <!-- быстрый просмотр (десктоп hover) -->
-      <div class="card__quick">
-        <button class="btn btn--light btn--sm" @click.prevent="qvOpen = true">Быстрый просмотр</button>
+    </div>
+    <div class="pb">
+      <div class="pn">{{ p.name }}</div>
+      <div v-if="p.meta" class="pc">{{ p.meta }}</div>
+      <div class="pp">
+        <span v-if="ratingValue > 0" class="prate">
+          <svg viewBox="0 0 24 24" fill="currentColor" width="13" height="13"><path d="m12 2 2.9 6.3 6.8.7-5 4.6 1.4 6.7L12 17.8 5.9 20.3l1.4-6.7-5-4.6 6.8-.7z"/></svg>
+          <b>{{ ratingValue.toFixed(1) }}</b>
+        </span>
+        <span class="pprice">
+          <span class="n">{{ formatRub(price) }}</span>
+          <span v-if="p.oldPrice" class="o">{{ formatRub(p.oldPrice) }}</span>
+        </span>
       </div>
     </div>
-
-    <div class="card__body">
-      <NuxtLink :to="`/product/${p.slug}`">
-        <h3 class="card__name">{{ p.name }}</h3>
-      </NuxtLink>
-      <div class="card__meta">{{ p.meta }}</div>
-      <div class="card__flags" v-if="isTopPick || isPopular">
-        <span v-if="isTopPick" class="tag tag--green">Лучший выбор</span>
-        <span v-if="isPopular" class="tag tag--blush">Популярно</span>
-      </div>
-      <div v-if="compositionSummary" class="card__composition">
-        <span>Состав: {{ compositionSummary }}</span>
-      </div>
-      <!-- рисуем только то, что реально есть в данных (пустые строки и «—» не показываем) -->
-      <div v-if="primarySizeLabel || shelfLife || sizeHeight || sizeWeight || packagingHint" class="card__specs">
-        <div v-if="primarySizeLabel"><strong>Размер</strong> {{ primarySizeLabel }}</div>
-        <div v-if="primarySizeLabel"><strong>Цена за набор</strong> {{ formatRub(primarySizePrice) }}</div>
-        <div v-if="shelfLife"><strong>Срок стояния</strong> {{ shelfLife }}</div>
-        <div v-if="sizeHeight"><strong>Высота</strong> {{ sizeHeight }}</div>
-        <div v-if="sizeWeight"><strong>Вес</strong> {{ sizeWeight }}</div>
-        <div v-if="packagingHint"><strong>Упаковка</strong> {{ packagingHint }}</div>
-      </div>
-      <div class="card__features">
-        <span v-for="badge in serviceBadges" :key="badge" class="tag tag--clay card__feature-tag">{{ badge }}</span>
-      </div>
-      <div class="card__row">
-        <div class="card__price">
-          <b>от {{ formatRub(primarySizePrice) }}</b>
-          <span v-if="p.oldPrice" class="old">{{ formatRub(p.oldPrice) }}</span>
-        </div>
-        <button
-          class="card__add" :class="{ 'is-done': justAdded }"
-          aria-label="В корзину"
-          @click.prevent="add"
-        >
-          <svg v-if="!justAdded" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
-          <svg v-else viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7"/></svg>
-          <span class="card__add-label">{{ justAdded ? 'Добавлено' : 'В корзину' }}</span>
-        </button>
-      </div>
-    </div>
-
-    <!-- QuickView модал — локальный, без глобального состояния -->
-    <ProductQuickView
-      :p="p"
-      :open="qvOpen"
-      :tag-class="tagClass"
-      :img-error="imgError"
-      :service-badges="serviceBadges"
-      :primary-size-label="primarySizeLabel"
-      :primary-size-price="primarySizePrice"
-      :shelf-life="shelfLife"
-      :size-height="sizeHeight"
-      :size-weight="sizeWeight"
-      :qv-size="qvSize"
-      :qv-price="qvPrice"
-      :format-rub="formatRub"
-      @close="qvOpen = false"
-      @add="addFromQv"
-      @update:qv-size="qvSize = $event"
-    />
-  </article>
+  </NuxtLink>
 </template>
 
 <script setup lang="ts">
+import { buildProductPresentation } from '~/lib/product/presentation'
 import type { Product } from '~/composables/useShop'
 
 const props = defineProps<{ p: Product }>()
-const settings = useSettings()
 
-const { addLine } = useCart()
-const { show }    = useToast()
-const wishlist    = useWishlist()
-const isFaved     = computed(() => wishlist.has(props.p.slug).value)
+const wishlist = useWishlist()
+const imgError = ref(false)
 
-const {
-  imgError,
-  justAdded,
-  qvOpen,
-  qvSize,
-  qvPrice,
-  isTopPick,
-  isPopular,
-  primarySizeLabel,
-  primarySizePrice,
-  compositionSummary,
-  shelfLife,
-  sizeHeight,
-  sizeWeight,
-  packagingHint,
-  serviceBadges,
-  tagClass,
-  formatRub,
-  add,
-  addFromQv,
-} = useProductCardState(() => props.p, {
-  addLine,
-  showToast: show,
-  settings,
+const isFaved   = computed(() => !!props.p.slug && wishlist.slugs.value.includes(props.p.slug))
+const price     = computed(() => buildProductPresentation(props.p).primarySizePrice || props.p.price || 0)
+const ratingValue = computed(() => Number(props.p.rating || 0))
+const tagCls = computed(() => {
+  const t = String(props.p.tag || '')
+  if (/нов|new/i.test(t)) return 'new'
+  if (/скид|sale|%|−|–|-\s?\d/i.test(t)) return 'sale'
+  return 'hit'
 })
+
+function formatRub(value: number) {
+  return new Intl.NumberFormat('ru-RU').format(Math.round(value || 0)) + ' ₽'
+}
 </script>
 
 <style scoped>
-:deep(.card__real-img) {
-  position: absolute; inset: 0; width: 100%; height: 100%;
-  object-fit: cover; border-radius: inherit;
+/* Дефолтная карточка каталога (.pcard) — единый вид на всех страницах.
+   Токены — только глобальные (tokens.css): --muted вместо --ink-faint,
+   --ink-2 вместо --ink-soft, --sand вместо --line-strong, --sh-sm/--sh-md вместо --shadow. */
+.pcard {
+  position: relative; display: flex; flex-direction: column;
+  background: var(--card); border: 1px solid var(--line); border-radius: 18px;
+  overflow: hidden; box-shadow: var(--sh-sm); transition: transform .16s var(--ease), box-shadow .16s, border-color .16s;
+  cursor: pointer; text-decoration: none; color: inherit;
 }
+.pcard:hover { transform: translateY(-3px); box-shadow: var(--sh-md); border-color: var(--sand); }
 
-.card__flags,
-.card__features {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 7px;
-  margin-top: 9px;
-}
+.pcard .pm { position: relative; aspect-ratio: 4/5; overflow: hidden; }
+:deep(.pcard-img) { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
 
-.card__feature-tag {
-  font-size: 10px;
-  padding: 4px 10px;
-  letter-spacing: .01em;
+.pcard .tag {
+  position: absolute; top: 12px; left: 12px; z-index: 2;
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 11.5px; font-weight: 700; letter-spacing: .02em; text-transform: uppercase;
+  padding: 4px 9px; border-radius: 6px;
 }
-.card__composition {
-  margin-top: 8px;
-  color: var(--muted);
-  font-size: 12px;
+.pcard .tag.hit  { background: var(--clay);  color: #fff; }
+.pcard .tag.new  { background: var(--green); color: #fff; }
+.pcard .tag.sale { background: var(--blush); color: #6b2f18; }
+
+.pcard .like {
+  position: absolute; top: 10px; right: 10px; z-index: 3;
+  width: 34px; height: 34px; border-radius: 50%;
+  background: rgba(255,255,255,.85); backdrop-filter: blur(5px);
+  display: grid; place-items: center; color: var(--muted);
+  border: 1px solid rgba(255,255,255,.4); cursor: pointer;
+  transition: transform .14s var(--ease), color .14s;
 }
-.card__specs {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 6px;
-  margin-top: 10px;
-  font-size: 12px;
-  color: var(--muted);
+.pcard .like svg { width: 19px; height: 19px; }
+.pcard .like:hover { color: var(--clay); transform: scale(1.08); }
+.pcard .like:active { transform: scale(.86); }
+.pcard .like.on { color: var(--clay); }
+.pcard .like.on svg { fill: var(--clay); stroke: var(--clay); animation: likepop .32s ease; }
+@keyframes likepop { 0% { transform: scale(1); } 40% { transform: scale(1.35); } 100% { transform: scale(1); } }
+
+.pcard .pb {
+  position: absolute; left: 10px; right: 10px; bottom: 10px; z-index: 2;
+  display: flex; flex-direction: column;
+  padding: 13px 14px; background: var(--card); border-radius: 16px;
+  box-shadow: 0 10px 26px rgba(20,28,22,.18);
 }
-.card__specs strong {
-  font-weight: 600;
-  color: var(--ink);
-}
+.pcard .pn { font-weight: 600; font-size: 15.5px; letter-spacing: -.01em; line-height: 1.25; }
+.pcard .pc { font-size: 12.5px; color: var(--muted); margin: 3px 0 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pcard .pp { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: auto; }
+.pcard .prate { flex: none; display: inline-flex; align-items: center; gap: 4px; font-size: 12.5px; color: var(--muted); }
+.pcard .prate svg { color: var(--clay); }
+.pcard .prate b { color: var(--ink-2); font-weight: 600; }
+.pcard .pprice { display: inline-flex; align-items: baseline; gap: 7px; }
+.pcard .pprice .n { font-weight: 700; font-size: 17px; font-variant-numeric: tabular-nums; }
+.pcard .pprice .o { font-size: 13px; color: var(--muted); text-decoration: line-through; font-variant-numeric: tabular-nums; }
 </style>

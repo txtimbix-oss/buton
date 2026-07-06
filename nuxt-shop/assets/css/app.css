@@ -248,7 +248,7 @@
   opacity: 0; transition: opacity .25s var(--ease); white-space: nowrap;
 }
 .card__quick .btn { box-shadow: var(--sh-md); }
-.card__body { padding: 13px 2px 4px; min-width: 0; }
+.card__body { padding: 13px 12px 8px; min-width: 0; }
 .card__name {
   font-family: var(--serif); font-size: 18px; line-height: 1.15;
 }

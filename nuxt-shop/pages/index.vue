@@ -26,7 +26,7 @@
               <span class="lbl">фото букета</span>
             </div>
             <span v-if="p.tag" :class="'tag ' + p.tag[0]">{{ p.tag[1] }}</span>
-            <button :class="'like' + (likes[p.n] ? ' on' : '')" @click.prevent="toggleLike(p.n)"><span v-html="I.heart"></span></button>
+            <button :class="'like' + (isWished(p.slug) ? ' on' : '')" :disabled="!p.slug" @click.prevent="toggleWish(p.slug)"><span v-html="I.heart"></span></button>
             <button class="quick" @click.prevent><span v-html="I.eye"></span> Смотреть товар</button>
           </div>
           <div class="pb">
@@ -87,7 +87,7 @@
               <span class="lbl">фото букета</span>
             </div>
             <span v-if="p.tag" :class="'tag ' + p.tag[0]">{{ p.tag[1] }}</span>
-            <button :class="'like' + (likes[p.n] ? ' on' : '')" @click.prevent="toggleLike(p.n)"><span v-html="I.heart"></span></button>
+            <button :class="'like' + (isWished(p.slug) ? ' on' : '')" :disabled="!p.slug" @click.prevent="toggleWish(p.slug)"><span v-html="I.heart"></span></button>
             <button class="quick" @click.prevent><span v-html="I.eye"></span> Смотреть товар</button>
           </div>
           <div class="pb">
@@ -281,9 +281,10 @@ const marqReviews = computed(() => {
   return base.length ? [...base, ...base] : []
 })
 
-/* likes state */
-const likes = ref({ 'Белые ночи': true, 'Тихий вечер': true })
-const toggleLike = n => { likes.value = { ...likes.value, [n]: !likes.value[n] } }
+/* избранное — общий стор useWishlist (по slug), чтобы лайк с главной долетал до /wishlist */
+const wishlist = useWishlist()
+const isWished = slug => !!slug && wishlist.slugs.value.includes(slug)
+const toggleWish = slug => { if (slug) wishlist.toggle(slug) }
 
 /* быстрый просмотр (поп-ап вместо перехода на полную страницу) */
 const quickCard = ref(null)

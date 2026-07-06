@@ -11,15 +11,14 @@
       <div class="co-head"><h1 class="serif">Оформление заказа</h1></div>
 
       <!-- FREE DELIVERY BAR -->
-      <div class="freebar">
+      <div class="freebar" :class="{ 'is-free': freeDelivery }">
         <span class="fb-ic">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 6h11v9H3zM14 9h4l3 3v3h-7z"/><circle cx="7" cy="18" r="1.6"/><circle cx="17" cy="18" r="1.6"/></svg>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 6h11v9H3zM14 9h4l3 3v3h-7z"/><circle cx="7" cy="18" r="1.6"/><circle cx="17" cy="18" r="1.6"/></svg>
         </span>
-        <div class="fb-t">
-          <span v-if="freeDelivery"><b>Доставка бесплатно</b> — сумма заказа превысила {{ fmt(freeThreshold) }} ₽ 🎉</span>
-          <span v-else>До <b>бесплатной доставки</b> осталось <b>{{ fmt(toFree) }} ₽</b></span>
-          <div class="track"><div class="fill" :style="{ width: freePct + '%' }"></div></div>
-        </div>
+        <span class="fb-t">
+          <template v-if="freeDelivery">Доставка <b>бесплатно</b> — заказ от {{ fmt(freeThreshold) }} ₽ 🎉</template>
+          <template v-else>До бесплатной доставки осталось <b>{{ fmt(toFree) }} ₽</b></template>
+        </span>
       </div>
 
       <div class="co">
@@ -35,7 +34,8 @@
             <div class="card-b">
               <div v-for="x in items" :key="x.id" class="litem">
                 <div class="lm">
-                  <div class="ph" :style="{ position: 'absolute', inset: 0, background: `linear-gradient(160deg, ${x.m}, oklch(0.9 0.02 80))` }">
+                  <img v-if="x.image" :src="x.image" :alt="x.n" class="lm-img" loading="lazy" />
+                  <div v-else class="ph" :style="{ position: 'absolute', inset: 0, background: `linear-gradient(160deg, ${x.m}, oklch(0.9 0.02 80))` }">
                     <span class="lbl">фото</span>
                   </div>
                 </div>
@@ -87,15 +87,10 @@
               </div>
 
               <div v-if="method === 'courier'" style="margin-top:18px">
-                <div class="map">
-                  <div class="road" style="left:0;right:0;top:46%;height:6px"></div>
-                  <div class="road" style="top:0;bottom:0;left:58%;width:6px"></div>
-                  <div class="zone-circle"></div>
-                  <div class="pin">
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8 2 5 5 5 9c0 5 7 13 7 13s7-8 7-13c0-4-3-7-7-7Z"/><circle cx="12" cy="9" r="2.6" fill="#fff"/></svg>
-                  </div>
-                  <div class="maptag">Зона: {{ zoneObj.n }} · {{ zoneObj.price }} ₽</div>
-                </div>
+                <ClientOnly>
+                  <YandexMapPicker @select="onMapAddress" />
+                </ClientOnly>
+                <div v-if="zoneObj.n" class="cart-zonetag">Зона: {{ zoneObj.n }} · {{ zoneObj.price }} ₽</div>
                 <div class="zones">
                   <button v-for="z in ZONES" :key="z.id" class="zone" :class="{ on: zone === z.id }" @click="zone = z.id">
                     {{ z.n }}<span class="zp tnum">{{ z.price }} ₽</span>
@@ -139,7 +134,7 @@
               </template>
               <div class="field">
                 <label>Адрес доставки <span class="req">*</span></label>
-                <input class="inp" placeholder="Улица, дом" />
+                <input class="inp" placeholder="Улица, дом" v-model="address" />
                 <div class="suggest">
                   <span class="sg" @click="zone = 'center'">Невский пр., 28</span>
                   <span class="sg" @click="zone = 'vasil'">6-я линия В.О., 12</span>
@@ -324,6 +319,7 @@ const items = computed(() => cart.items.value.map(l => ({
   price: l.price,
   old: 0,
   qty: l.qty,
+  image: l.image || '',
   m: BLOOM_COLOR[l.bloom] || 'oklch(0.85 0.06 20)',
 })))
 
@@ -382,6 +378,8 @@ function dateChips() {
 // state
 const method = ref('courier')
 const zone = ref(null)
+const address = ref('')
+function onMapAddress (addr) { if (addr) address.value = addr }
 const self = ref(false)
 const date = ref(0)
 const slot = ref('s3')
@@ -494,12 +492,10 @@ const applyPromo = () => {
 /* ---- checkout head + freebar ---- */
 .co-head{margin-bottom:8px;}
 .co-head h1{font-family:'Montserrat',serif;font-weight:500;font-size:clamp(30px,3.6vw,44px);letter-spacing:-.015em;}
-.freebar{display:flex;align-items:center;gap:14px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:13px 16px;margin:18px 0 28px;}
-.freebar .fb-ic{width:34px;height:34px;border-radius:9px;background:var(--green-wash);color:var(--green);display:grid;place-items:center;flex:none;}
-.freebar .fb-t{flex:1;font-size:13.5px;color:var(--ink-soft);}
-.freebar .fb-t b{color:var(--ink);}
-.freebar .track{height:7px;border-radius:7px;background:var(--paper-2);overflow:hidden;margin-top:7px;}
-.freebar .fill{height:100%;background:linear-gradient(90deg,var(--green-soft),var(--green));border-radius:7px;transition:width .3s;}
+.freebar{display:flex;align-items:center;gap:12px;background:var(--green-wash);border:1px solid color-mix(in srgb, var(--green) 22%, transparent);border-radius:12px;padding:12px 16px;margin:18px 0 24px;font-size:14px;line-height:1.35;color:var(--ink-soft);}
+.freebar .fb-ic{width:32px;height:32px;border-radius:9px;background:var(--card);color:var(--green);display:grid;place-items:center;flex:none;}
+.freebar .fb-t{flex:1;}
+.freebar .fb-t b{color:var(--green);font-weight:700;white-space:nowrap;}
 
 .co{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,400px);gap:30px;align-items:start;}
 @media(max-width:980px){.co{grid-template-columns:1fr;}}
@@ -517,6 +513,7 @@ const applyPromo = () => {
 .litem:first-child{padding-top:0;}
 .litem:last-child{border-bottom:none;padding-bottom:0;}
 .litem .lm{width:78px;height:96px;border-radius:10px;flex:none;position:relative;overflow:hidden;border:1px solid var(--line);}
+.litem .lm-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;}
 .litem .li{flex:1;min-width:0;}
 .litem .li .ln{font-weight:600;font-size:15.5px;}
 .litem .li .lc{font-size:12.5px;color:var(--ink-faint);margin:2px 0 4px;}
@@ -562,16 +559,9 @@ textarea.inp{height:auto;min-height:74px;padding:11px 13px;resize:vertical;line-
 .selfrow.on .cbx{background:var(--green);border-color:var(--green);color:#fff;}
 .selfrow .st{font-size:14px;font-weight:500;}
 
-/* map + zones */
-.map{position:relative;height:200px;border-radius:12px;overflow:hidden;border:1px solid var(--line);margin-bottom:14px;background:
-  repeating-linear-gradient(0deg, oklch(0.9 0.012 150) 0 1px, transparent 1px 28px),
-  repeating-linear-gradient(90deg, oklch(0.9 0.012 150) 0 1px, transparent 1px 28px),
-  oklch(0.95 0.012 150);}
-.map .road{position:absolute;background:oklch(0.86 0.014 80);}
-.map .pin{position:absolute;top:50%;left:50%;transform:translate(-50%,-100%);color:var(--clay);}
-.map .zone-circle{position:absolute;top:50%;left:50%;width:150px;height:150px;border-radius:50%;transform:translate(-50%,-50%);background:oklch(0.62 0.15 148 / .1);border:1.5px dashed var(--green-soft);}
-.map .maptag{position:absolute;left:12px;bottom:12px;background:oklch(1 0 0 / .9);backdrop-filter:blur(6px);border:1px solid var(--line);border-radius:9px;padding:7px 12px;font-size:12.5px;font-weight:600;}
-.zones{display:flex;gap:8px;flex-wrap:wrap;}
+/* zone tag + zones */
+.cart-zonetag{display:inline-block;margin:12px 0 4px;background:var(--green-wash);border:1px solid var(--green-soft);border-radius:9px;padding:7px 12px;font-size:12.5px;font-weight:600;color:var(--green);}
+.zones{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;}
 .zone{padding:9px 13px;border-radius:30px;border:1px solid var(--line-strong);background:var(--card);font-size:13px;font-weight:500;cursor:pointer;transition:.14s;display:flex;align-items:center;gap:8px;}
 .zone:hover{border-color:var(--green-soft);}
 .zone.on{border-color:var(--green);background:var(--green-wash);color:var(--green);font-weight:600;}

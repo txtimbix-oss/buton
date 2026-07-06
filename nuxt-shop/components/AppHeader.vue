@@ -15,11 +15,42 @@
         <span class="hlogo__txt">Бутон<b>.</b></span>
       </NuxtLink>
 
-      <!-- кнопка «Каталог» -->
-      <NuxtLink to="/catalog" class="hcat-btn">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
-        Каталог
-      </NuxtLink>
+      <!-- «Каталог» — мега-меню -->
+      <div ref="hcatWrap" class="hcat-wrap">
+        <button
+          type="button"
+          class="hcat-btn"
+          :class="{ 'is-open': catalogOpen }"
+          aria-haspopup="true"
+          :aria-expanded="catalogOpen"
+          @click="catalogOpen = !catalogOpen"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+          Каталог
+          <svg class="hcat-btn__car" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+
+        <Transition name="megamenu">
+          <div v-if="catalogOpen" class="megamenu">
+            <NuxtLink to="/catalog" class="megamenu__all" @click="catalogOpen = false">
+              <span class="megamenu__all-ic">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+              </span>
+              <span>Все букеты</span>
+              <svg class="megamenu__arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+            </NuxtLink>
+            <div class="megamenu__grid">
+              <NuxtLink
+                v-for="m in catalogMenu"
+                :key="m.to"
+                :to="m.to"
+                class="megamenu__item"
+                @click="catalogOpen = false"
+              >{{ m.label }}</NuxtLink>
+            </div>
+          </div>
+        </Transition>
+      </div>
 
       <!-- поиск -->
       <form class="hsearch" @submit.prevent="goSearch">
@@ -77,7 +108,15 @@
             {{ c.label }}
             <svg v-if="c.caret" class="hcat__car" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
           </NuxtLink>
+          <NuxtLink to="/custom" class="hcat hcat--accent" :class="{ 'is-on': route.path.startsWith('/custom') }">
+            <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="6.4" r="2.3"/><circle cx="12" cy="17.6" r="2.3"/><circle cx="6.4" cy="12" r="2.3"/><circle cx="17.6" cy="12" r="2.3"/><circle cx="12" cy="12" r="2"/></svg>
+            Конструктор
+          </NuxtLink>
         </div>
+        <NuxtLink to="/delivery" class="hcats-usp">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 6h11v9H3zM14 9h4l3 3v3h-7z"/><circle cx="7" cy="18" r="1.6"/><circle cx="17" cy="18" r="1.6"/></svg>
+          Бесплатная доставка от {{ freeThresholdFmt }} ₽
+        </NuxtLink>
       </div>
     </div>
 
@@ -175,21 +214,45 @@ const userLink = '/account'
 const searchInputEl = ref<HTMLInputElement | null>(null)
 const hints = computed(() => settings.value.search.hints)
 
-/* категории второго ряда */
+/* «Каталог» — мега-меню: весь каталог под одной кнопкой (бургер-иконка теперь честная) */
+const catalogOpen = ref(false)
+const hcatWrap = ref<HTMLElement | null>(null)
+const catalogMenu = [
+  { label: 'Монобукеты', to: '/catalog?coll=mono' },
+  { label: 'В коробке', to: '/catalog?coll=box' },
+  { label: 'Авторские', to: '/catalog?coll=author' },
+  { label: 'Свадебные', to: '/catalog?coll=wed' },
+  { label: 'Хиты', to: '/catalog?quick=hit' },
+  { label: 'Со скидкой', to: '/catalog?sale=1' },
+]
+
+/* ряд 2 — только отдельные разделы (весь каталог ушёл в мега-меню) */
 const cats = [
-  { label: 'Тренды', to: '/catalog?quick=hit' },
-  { label: 'Скидки', to: '/catalog?sale=1' },
-  // Монобукеты/В коробке/Авторские/Свадебные дублировали чипы на странице каталога
-  // (клик подсвечивал зелёным и сверху, и снизу) — свёрнуты в один общий пункт.
-  { label: 'Букеты', to: '/catalog' },
   { label: 'Подписка', to: '/subscription' },
   { label: 'Праздники', to: '/holiday' },
   { label: 'Подарочные сертификаты', to: '/gift-cards' },
   { label: 'Доставка', to: '/delivery' },
 ]
 
+/* USP справа в ряду 2 — балансирует ряд, порог из настроек */
+const freeThresholdFmt = computed(() =>
+  (Number(settings.value?.deliveryFreeThreshold) || 5000).toLocaleString('ru-RU'),
+)
+
 /* какая вкладка открыта сейчас — сверяем path + query с `to` каждой вкладки */
 const route = useRoute()
+
+/* закрытие мега-меню: клик вне обёртки + смена маршрута */
+function onDocPointer(e: Event) {
+  if (hcatWrap.value && !hcatWrap.value.contains(e.target as Node)) catalogOpen.value = false
+}
+watch(catalogOpen, (open) => {
+  if (!import.meta.client) return
+  if (open) document.addEventListener('mousedown', onDocPointer)
+  else document.removeEventListener('mousedown', onDocPointer)
+})
+watch(() => route.fullPath, () => { catalogOpen.value = false })
+onBeforeUnmount(() => { if (import.meta.client) document.removeEventListener('mousedown', onDocPointer) })
 function catActive(c: { to: string; caret?: boolean }) {
   if (c.caret) return false                       // «Праздники» — это дропдаун, не подсвечиваем
   const [path, qs] = c.to.split('?')
@@ -248,7 +311,39 @@ const {
 }
 .hcat-btn:hover { background: var(--green-2, #3b5a45); }
 .hcat-btn:active { transform: scale(.98); }
+.hcat-btn { border: none; cursor: pointer; font-family: inherit; }
 .hcat-btn svg { width: 18px; height: 18px; }
+.hcat-btn__car { width: 13px !important; height: 13px !important; margin-left: -3px; opacity: .85; transition: transform .2s; }
+.hcat-btn.is-open .hcat-btn__car { transform: rotate(180deg); }
+
+/* ===== мега-меню «Каталог» ===== */
+.hcat-wrap { position: relative; flex: none; }
+.megamenu {
+  position: absolute; top: calc(100% + 12px); left: 0; z-index: 50;
+  width: 344px; padding: 10px;
+  background: var(--card); border: 1px solid var(--line);
+  border-radius: 16px; box-shadow: var(--sh-lg);
+}
+.megamenu__all {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 14px; margin-bottom: 8px; border-radius: 11px;
+  background: var(--green); color: #fff; font-weight: 600; font-size: 14.5px; text-decoration: none;
+  transition: background .15s;
+}
+.megamenu__all:hover { background: var(--green-2, #2f8a45); }
+.megamenu__all-ic { display: inline-flex; }
+.megamenu__all-ic svg { width: 18px; height: 18px; }
+.megamenu__arrow { width: 16px; height: 16px; margin-left: auto; }
+.megamenu__grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; }
+.megamenu__item {
+  padding: 10px 14px; border-radius: 10px;
+  font-size: 14px; font-weight: 500; color: var(--ink); text-decoration: none; white-space: nowrap;
+  transition: background .14s, color .14s;
+}
+.megamenu__item:hover { background: var(--paper-2); color: var(--green); }
+
+.megamenu-enter-active, .megamenu-leave-active { transition: opacity .16s, transform .16s; }
+.megamenu-enter-from, .megamenu-leave-to { opacity: 0; transform: translateY(-8px); }
 
 .hsearch {
   flex: 1 1 auto; min-width: 120px; max-width: 560px;
@@ -320,15 +415,21 @@ const {
   position: relative;
   border-top: 1px solid color-mix(in srgb, var(--line) 70%, transparent);
 }
-.hcats-inner { position: relative; }
+.hcats-inner { position: relative; display: flex; align-items: center; justify-content: space-between; gap: 24px; }
 .hcats {
-  display: flex; align-items: center; gap: clamp(18px, 2.4vw, 40px);
+  display: flex; align-items: center; gap: clamp(16px, 2vw, 32px);
   height: 50px; overflow-x: auto; scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
-  /* пунктов стало меньше — центрируем ряд, чтобы не было пустоты справа.
-     safe: при переполнении (мобилка) откатывается к flex-start, первый пункт не обрезается. */
-  justify-content: safe center;
+  min-width: 0;
 }
+/* USP справа — балансирует ряд, чтобы 4 пункта слева не висели «в центре» */
+.hcats-usp {
+  display: inline-flex; align-items: center; gap: 8px; flex: none;
+  font-size: 13px; font-weight: 600; color: var(--green);
+  text-decoration: none; white-space: nowrap;
+}
+.hcats-usp svg { width: 17px; height: 17px; }
+.hcats-usp:hover { color: var(--green-2, #2f8a45); }
 .hcats::-webkit-scrollbar { display: none; }
 .hcat {
   position: relative;
@@ -350,10 +451,21 @@ const {
 .hcat.is-active::after { transform: scaleX(1); opacity: 1; }
 .hcat__car { width: 14px; height: 14px; opacity: .6; }
 
+/* конструктор — акцентный оранжевый пункт */
+.hcat--accent {
+  gap: 7px; height: 34px; padding: 0 16px; border-radius: var(--r-pill, 999px);
+  background: color-mix(in srgb, var(--clay) 15%, transparent);
+  color: var(--clay-2, #d56927); font-weight: 700; line-height: 1;
+}
+.hcat--accent svg { width: 15px; height: 15px; display: block; flex: none; }
+.hcat--accent::after { content: none; }
+.hcat--accent:hover { color: #fff; background: var(--clay); }
+.hcat--accent.is-on { color: #fff; background: var(--clay); }
+
 /* ====== адаптив ====== */
 @media (max-width: 1100px) {
   .hburger { display: inline-flex; }
-  .hloc, .hcur { display: none; }
+  .hloc, .hcur, .hcats-usp { display: none; }
   .hbar { gap: 10px; height: 62px; }
 }
 @media (max-width: 760px) {
@@ -367,7 +479,7 @@ const {
 }
 @media (max-width: 520px) {
   .hbar { gap: 8px; }
-  .hcat-btn { display: none; }                 /* «Каталог» — в бургер-меню и нижней навигации */
+  .hcat-wrap { display: none; }                /* «Каталог» — в бургер-меню и нижней навигации */
   .hsearch { display: none; }                  /* инлайн-поиск прячем — вместо него иконка 🔍 */
   .hicons { margin-left: auto; }               /* прижимаем иконки вправо (поиск больше не растягивает шапку) */
   .hicon--wish, .hicon--user { display: none; }   /* избранное и кабинет — в нижней навигации */
